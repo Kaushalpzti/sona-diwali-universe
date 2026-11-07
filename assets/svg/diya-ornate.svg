@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 160" width="100%" height="100%">
+  <defs>
+    <!-- Flame Gradients -->
+    <linearGradient id="flameCore" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="25%" stop-color="#fff59d" />
+      <stop offset="60%" stop-color="#ffb74d" />
+      <stop offset="100%" stop-color="#ff3d00" />
+    </linearGradient>
+    <radialGradient id="flameAura" cx="50%" cy="40%" r="55%">
+      <stop offset="0%" stop-color="#ffe082" stop-opacity="0.85" />
+      <stop offset="45%" stop-color="#ff9800" stop-opacity="0.45" />
+      <stop offset="100%" stop-color="#e65100" stop-opacity="0" />
+    </radialGradient>
+    <!-- Brass / Gold Bowl Gradients -->
+    <linearGradient id="brassGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffe57f" />
+      <stop offset="30%" stop-color="#ffca28" />
+      <stop offset="70%" stop-color="#c67c00" />
+      <stop offset="100%" stop-color="#6d3c00" />
+    </linearGradient>
+    <linearGradient id="brassRim" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#945200" />
+      <stop offset="35%" stop-color="#ffe082" />
+      <stop offset="65%" stop-color="#ffb300" />
+      <stop offset="100%" stop-color="#945200" />
+    </linearGradient>
+    <linearGradient id="oilPool" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#5d2600" />
+      <stop offset="50%" stop-color="#c25900" />
+      <stop offset="100%" stop-color="#5d2600" />
+    </linearGradient>
+    <filter id="glowFilter" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="8" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Ground Ambient Glow -->
+  <ellipse cx="100" cy="142" rx="75" ry="14" fill="rgba(255, 179, 0, 0.22)" filter="url(#glowFilter)" />
+
+  <!-- Diya Stand / Base -->
+  <path d="M 75,134 C 75,142 125,142 125,134 C 118,131 82,131 75,134 Z" fill="#6d3c00" />
+  <ellipse cx="100" cy="133" rx="28" ry="5" fill="#c67c00" />
+
+  <!-- Diya Main Brass Body -->
+  <path d="M 22,86 C 24,128 176,128 178,86 C 158,102 42,102 22,86 Z" fill="url(#brassGrad)" />
+  
+  <!-- Carved Ornamental Floral Petals on Bowl -->
+  <path d="M 50,96 C 58,114 74,116 80,98 C 86,116 114,116 120,98 C 126,116 142,114 150,96" stroke="#ffe082" stroke-width="2" fill="none" opacity="0.85" />
+  <circle cx="80" cy="110" r="3" fill="#ffe082" />
+  <circle cx="100" cy="114" r="3.5" fill="#ffe082" />
+  <circle cx="120" cy="110" r="3" fill="#ffe082" />
+
+  <!-- Diya Inner Oil Reservoir Rim -->
+  <ellipse cx="100" cy="85" rx="78" ry="16" fill="url(#brassRim)" />
+  <ellipse cx="100" cy="85" rx="72" ry="13" fill="url(#oilPool)" />
+  <ellipse cx="100" cy="85" rx="60" ry="8" fill="#e65100" opacity="0.6" />
+
+  <!-- Wick Tip -->
+  <path d="M 97,84 Q 100,68 103,64 Q 104,74 97,84 Z" fill="#2d1300" />
+
+  <!-- Flame Glowing Aura -->
+  <circle cx="100" cy="46" r="42" fill="url(#flameAura)" filter="url(#glowFilter)" />
+
+  <!-- Multi-layer Flickering Flame -->
+  <path d="M 100,10 C 122,38 126,58 116,68 C 108,76 92,76 84,68 C 74,58 78,38 100,10 Z" fill="url(#flameCore)" />
+  <path d="M 100,24 C 112,42 114,54 108,62 C 103,68 97,68 92,62 C 86,54 88,42 100,24 Z" fill="#ffffff" opacity="0.9" />
+  
+  <!-- Floating Stardust Sparks -->
+  <circle cx="78" cy="28" r="1.5" fill="#fff" opacity="0.8" />
+  <circle cx="124" cy="32" r="1.8" fill="#ffd54f" opacity="0.9" />
+  <circle cx="94" cy="6" r="1.2" fill="#fff" opacity="0.7" />
+  <circle cx="112" cy="16" r="1.5" fill="#ffb74d" opacity="0.85" />
+</svg>

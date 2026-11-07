@@ -6,20 +6,20 @@
   const $$ = (s, root = document) => [...root.querySelectorAll(s)];
 
   const FINAL_TARGET = 20;
-  const STORAGE_KEY = 'sonas-diwali-universe-progress-v2';
+  const STORAGE_KEY = 'sonas-diwali-universe-mobile-v3';
 
   const freshState = () => ({
     hearts: 0,
     awards: [],
-    found: [],
     openedLetters: [],
     litDiyas: [],
     redeemedCoupons: [],
     customPhotos: {},
-    quizDone: false,
-    memoryDone: false,
-    catchBest: 0,
-    diyaBest: 0
+    slotBest: '',
+    stackerBest: 0,
+    flyBest: 0,
+    constellationDone: false,
+    rangoliDone: false
   });
 
   let state = freshState();
@@ -36,7 +36,7 @@
   let isMusicPlaying = false;
   window.sonaSoundEnabled = true;
 
-  // Save progress
+  // Save state
   function save() {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
@@ -51,12 +51,20 @@
     state.hearts += points;
     save();
     playChime();
-    showToast(message || `You collected +${points} heart${points === 1 ? '' : 's'}! 💖`);
+    triggerHaptic();
+    showToast(message || `Collected +${points} heart${points === 1 ? '' : 's'}! 💖`);
     createFloatingHeartBurst();
     return true;
   }
 
-  // Update progress displays
+  // Haptic feedback (Mobile native feel)
+  function triggerHaptic(ms = 40) {
+    try {
+      if (navigator.vibrate) navigator.vibrate(ms);
+    } catch (_) {}
+  }
+
+  // Update progress
   function updateProgress() {
     const safeHearts = Math.max(0, state.hearts);
     const percent = Math.min(100, Math.round((safeHearts / FINAL_TARGET) * 100));
@@ -67,7 +75,7 @@
     $('#progressFill').style.width = `${percent}%`;
 
     const unlocked = safeHearts >= FINAL_TARGET;
-    $('#unlockStatus').textContent = unlocked ? 'Secret finale letter unlocked! 💖' : `${FINAL_TARGET - safeHearts} hearts to unlock`;
+    $('#unlockStatus').textContent = unlocked ? 'Secret finale letter unlocked! 💖' : `${FINAL_TARGET - safeHearts} hearts to unlock secret finale`;
     $('#lockSymbol').textContent = unlocked ? '💖' : '🔒';
     $('#finaleProgressText').textContent = `${Math.min(safeHearts, FINAL_TARGET)} / ${FINAL_TARGET} hearts collected`;
     $('#finaleButton').disabled = !unlocked;
@@ -76,18 +84,6 @@
       ? 'You lit up every corner of our universe. Your grand finale surprise is ready, my Sona.'
       : `Collect ${FINAL_TARGET} hearts from your little adventures to open the final letter & grand fireworks show.`;
     $('#finale').classList.toggle('unlocked', unlocked);
-
-    $$('[data-game]').forEach(card => {
-      const id = card.dataset.game;
-      if (
-        state.awards.some(a => a.startsWith(`game-${id}`)) ||
-        (id === 'hidden' && state.found.length === 5) ||
-        (id === 'quiz' && state.quizDone) ||
-        (id === 'memory' && state.memoryDone)
-      ) {
-        card.classList.add('completed');
-      }
-    });
   }
 
   // Toast feedback
@@ -96,7 +92,7 @@
     toast.textContent = message;
     toast.classList.add('show');
     clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => toast.classList.remove('show'), 3200);
+    toastTimer = setTimeout(() => toast.classList.remove('show'), 3000);
   }
 
   // Modal controls
@@ -140,13 +136,13 @@
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
       osc.type = 'sine';
-      osc.frequency.setValueAtTime(587.33, ctx.currentTime); // D5
+      osc.frequency.setValueAtTime(659.25, ctx.currentTime);
       gain.gain.setValueAtTime(0.04, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.12);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
       osc.connect(gain);
       gain.connect(ctx.destination);
       osc.start();
-      osc.stop(ctx.currentTime + 0.13);
+      osc.stop(ctx.currentTime + 0.11);
     } catch (_) {}
   }
 
@@ -155,19 +151,19 @@
     const ctx = getAudioContext();
     if (!ctx) return;
     try {
-      const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6 arpeggio
-      notes.forEach((freq, idx) => {
+      const freqs = [523.25, 659.25, 783.99, 1046.50];
+      freqs.forEach((f, i) => {
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
         osc.type = 'triangle';
-        osc.frequency.value = freq;
-        const start = ctx.currentTime + idx * 0.08;
+        osc.frequency.value = f;
+        const start = ctx.currentTime + i * 0.08;
         gain.gain.setValueAtTime(0.05, start);
-        gain.gain.exponentialRampToValueAtTime(0.001, start + 0.4);
+        gain.gain.exponentialRampToValueAtTime(0.001, start + 0.38);
         osc.connect(gain);
         gain.connect(ctx.destination);
         osc.start(start);
-        osc.stop(start + 0.45);
+        osc.stop(start + 0.4);
       });
     } catch (_) {}
   }
@@ -181,32 +177,31 @@
       const gain = ctx.createGain();
       osc.type = 'sine';
       osc.frequency.setValueAtTime(440, ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.35);
+      osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.3);
       gain.gain.setValueAtTime(0.06, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
       osc.connect(gain);
       gain.connect(ctx.destination);
       osc.start();
-      osc.stop(ctx.currentTime + 0.42);
+      osc.stop(ctx.currentTime + 0.36);
     } catch (_) {}
   }
 
-  function playStampSound() {
+  function playSlotTick() {
     if (!window.sonaSoundEnabled) return;
     const ctx = getAudioContext();
     if (!ctx) return;
     try {
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(220, ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(110, ctx.currentTime + 0.15);
-      gain.gain.setValueAtTime(0.12, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.16);
+      osc.type = 'triangle';
+      osc.frequency.value = 880;
+      gain.gain.setValueAtTime(0.03, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.04);
       osc.connect(gain);
       gain.connect(ctx.destination);
       osc.start();
-      osc.stop(ctx.currentTime + 0.17);
+      osc.stop(ctx.currentTime + 0.05);
     } catch (_) {}
   }
 
@@ -216,18 +211,18 @@
     burst.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:9999;overflow:hidden;';
     document.body.appendChild(burst);
 
-    for (let i = 0; i < 18; i++) {
+    for (let i = 0; i < 16; i++) {
       const heart = document.createElement('span');
       heart.textContent = ['💖', '✨', '🪔', '♡', '🌸'][i % 5];
       heart.style.cssText = `
         position: absolute;
-        left: ${40 + Math.random() * 20}%;
-        bottom: 25%;
-        font-size: ${18 + Math.random() * 18}px;
+        left: ${45 + Math.random() * 10}%;
+        bottom: 30%;
+        font-size: ${18 + Math.random() * 16}px;
         transform: translate(-50%, 0);
         animation: floatBurst 1.8s cubic-bezier(0.12, 0.8, 0.3, 1) forwards;
-        --dx: ${(Math.random() - 0.5) * 260}px;
-        --dy: -${150 + Math.random() * 250}px;
+        --dx: ${(Math.random() - 0.5) * 240}px;
+        --dy: -${140 + Math.random() * 220}px;
       `;
       burst.appendChild(heart);
     }
@@ -243,14 +238,13 @@
     setTimeout(() => burst.remove(), 2000);
   }
 
-  // Music System
+  // Audio Music System
   const bgMusic = $('#bgMusic');
 
   function setTrack(index) {
     currentTrackIndex = (index + C.audioTracks.length) % C.audioTracks.length;
     const track = C.audioTracks[currentTrackIndex];
     bgMusic.src = track.file;
-    $('#dockTrackTitle').textContent = track.title;
   }
 
   async function playMusic() {
@@ -259,37 +253,25 @@
       if (!bgMusic.src) setTrack(currentTrackIndex);
       await bgMusic.play();
       isMusicPlaying = true;
-      $('#dockDisc').classList.add('playing');
-      $('#dockPlayBtn').textContent = '⏸';
-      $('#musicIcon').textContent = '🎶';
-      $('#musicToggle').classList.add('active');
-    } catch (err) {
+      $('#musicToggle').classList.add('playing');
+      $('#musicPillLabel').textContent = 'Playing ♫';
+    } catch (_) {
       isMusicPlaying = false;
-      $('#dockDisc').classList.remove('playing');
-      $('#dockPlayBtn').textContent = '▶';
-      $('#musicToggle').classList.remove('active');
-      showToast('Music play was paused by browser. Tap Play on dock to listen! 🎵');
+      $('#musicToggle').classList.remove('playing');
+      $('#musicPillLabel').textContent = 'Play ♫';
     }
   }
 
   function pauseMusic() {
     bgMusic.pause();
     isMusicPlaying = false;
-    $('#dockDisc').classList.remove('playing');
-    $('#dockPlayBtn').textContent = '▶';
-    $('#musicIcon').textContent = '🎵';
-    $('#musicToggle').classList.remove('active');
+    $('#musicToggle').classList.remove('playing');
+    $('#musicPillLabel').textContent = 'Play ♫';
   }
 
   function toggleMusic() {
     if (isMusicPlaying) pauseMusic();
     else playMusic();
-  }
-
-  function nextTrack() {
-    setTrack(currentTrackIndex + 1);
-    playMusic();
-    showToast(`Playing: ${C.audioTracks[currentTrackIndex].title}`);
   }
 
   // Live Love Journey Timer
@@ -324,53 +306,57 @@
     setInterval(update, 1000);
   }
 
-  // Render 5-Diya Ceremony
+  // 5-Diya Sacred Ceremony with Ornate SVG
   function renderDiyaCeremony() {
     const row = $('#diyaCeremonyRow');
     row.innerHTML = C.diyas.map(diya => {
       const isLit = state.litDiyas.includes(diya.id);
       return `
-        <div class="ceremony-diya-card ${isLit ? 'lit' : ''}" data-diya-id="${diya.id}" role="button" tabindex="0">
-          <div class="diya-icon-wrap">
-            <span class="diya-candle-flame"></span>
-            <span class="diya-candle-bowl">🪔</span>
+        <div class="diya-card ${isLit ? 'lit' : ''}" data-diya-id="${diya.id}" role="button" tabindex="0">
+          <div class="diya-card-img-wrap">
+            <img src="assets/svg/diya-ornate.svg" alt="${diya.name}" class="diya-card-svg ${isLit ? '' : 'diya-unlit-mask'}" />
           </div>
-          <b class="diya-name-en">${diya.name}</b>
-          <span class="diya-name-hi">${diya.hindi}</span>
-          <span class="diya-status-tag">${isLit ? 'GLOWING ✨' : 'TAP TO LIGHT'}</span>
+          <b class="diya-card-title">${diya.name}</b>
+          <span class="diya-card-hindi">${diya.hindi}</span>
+          <span class="diya-card-tag">${isLit ? 'GLOWING ✨' : 'TAP TO LIGHT'}</span>
         </div>
       `;
     }).join('');
 
-    $$('.ceremony-diya-card', row).forEach(card => {
+    $$('.diya-card', row).forEach(card => {
       card.addEventListener('click', () => {
         const id = card.dataset.diyaId;
         const diya = C.diyas.find(d => d.id === id);
         if (!diya) return;
 
         playDiyaSound();
+        triggerHaptic(50);
 
         if (!state.litDiyas.includes(id)) {
           state.litDiyas.push(id);
           card.classList.add('lit');
-          $('.diya-status-tag', card).textContent = 'GLOWING ✨';
+          $('.diya-card-svg', card).classList.remove('diya-unlit-mask');
+          $('.diya-card-tag', card).textContent = 'GLOWING ✨';
           award(`ceremony-${id}`, 1, `You lit the ${diya.name}! +1 heart 🪔`);
         }
 
         openModal(`
-          <div class="modal-eyebrow">🪔 CEREMONY BLESSING · ${diya.hindi}</div>
-          <h3>${diya.name} ✨</h3>
-          <div class="letter-paper" style="text-align:center;font-size:18px;">
+          <div class="card-eyebrow" style="text-align:center;">🪔 SACRED BLESSING · ${diya.hindi}</div>
+          <h3 style="text-align:center;margin:6px 0 16px;">${diya.name} ✨</h3>
+          <div style="width:110px;height:90px;margin:0 auto 12px;">
+            <img src="assets/svg/diya-ornate.svg" alt="Diya" style="width:100%;height:100%;display:block;" />
+          </div>
+          <div class="letter-paper" style="text-align:center;font-size:16px;">
             <p>${diya.message}</p>
           </div>
-          <div class="modal-actions" style="justify-content:center;">
+          <div style="display:flex;justify-content:center;margin-top:16px;">
             <button class="btn btn-primary" id="diyaWishClose">Receive Blessing ♡</button>
           </div>
         `);
         $('#diyaWishClose').addEventListener('click', closeModal);
 
         if (state.litDiyas.length === C.diyas.length && !state.awards.includes('ceremony-all-diyas')) {
-          award('ceremony-all-diyas', 3, 'All 5 sacred Diyas are shining! May your life be endlessly illuminated! 🪔✨');
+          award('ceremony-all-diyas', 3, 'All 5 sacred Diyas are shining bright for Sona! 🪔✨');
           $('#ceremonyStatus').innerHTML = '<b>✨ All 5 sacred Diyas are fully glowing! Happy Diwali, Sona! ✨</b>';
         }
       });
@@ -381,144 +367,844 @@
     }
   }
 
-  // Phuljhadi (Digital Sparkler) Canvas
-  function initSparkler() {
-    const canvas = $('#sparklerCanvas');
-    if (!canvas) return;
+  // ==========================================================
+  // BRAND NEW GAME 1: SKY LANTERN FLIGHT (उड़ता दीप)
+  // ==========================================================
+  function startSkyLanternFlight() {
+    openModal(`
+      <div class="card-eyebrow">GAME 01 · ACTION FLIGHT</div>
+      <h3>Sky Lantern Flight 🏮</h3>
+      <p class="section-info">Tap screen to keep your glowing paper lantern floating! Catch 6 golden hearts while dodging stormy rain clouds.</p>
+      <div style="display:flex;justify-content:space-between;font-size:12px;font-weight:700;color:var(--gold);margin-bottom:8px;">
+        <span>Hearts: <b id="flyScore">0</b>/6</span>
+        <span>Lives: <b id="flyLives">❤️❤️❤️</b></span>
+      </div>
+      <div class="fly-arena-wrap">
+        <canvas id="flyCanvas"></canvas>
+        <div class="arena-overlay-tap" id="flyTapOverlay">
+          <span>👆 TAP SCREEN TO FLY! 👆<br /><small style="color:var(--text-muted);font-weight:400;">Avoid clouds 🌧️, catch hearts 💖</small></span>
+        </div>
+      </div>
+    `);
+
+    const canvas = $('#flyCanvas');
     const ctx = canvas.getContext('2d');
-    let width = 0, height = 0;
-    let particles = [];
-    let isDrawing = false;
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width;
+    canvas.height = rect.height;
 
-    function resize() {
-      const rect = canvas.getBoundingClientRect();
-      width = canvas.width = rect.width;
-      height = canvas.height = rect.height;
-    }
-    resize();
-    window.addEventListener('resize', resize);
+    let score = 0, lives = 3, running = false;
+    let lanternY = canvas.height / 2, lanternVy = 0;
+    const gravity = 0.22, jump = -4.5;
+    let items = [], particles = [];
+    let frameId;
 
-    function addSparks(x, y, count = 8) {
-      for (let i = 0; i < count; i++) {
-        const angle = Math.random() * Math.PI * 2;
-        const speed = 1.5 + Math.random() * 4.5;
+    const overlay = $('#flyTapOverlay');
+
+    function flap() {
+      if (!running) {
+        running = true;
+        overlay.style.display = 'none';
+      }
+      lanternVy = jump;
+      playTap();
+      triggerHaptic(30);
+
+      // Add cute sparks under lantern
+      for (let i = 0; i < 4; i++) {
         particles.push({
-          x, y,
-          vx: Math.cos(angle) * speed,
-          vy: Math.sin(angle) * speed - 0.8,
+          x: 55, y: lanternY + 18,
+          vx: -1 - Math.random() * 2,
+          vy: 1 + Math.random() * 2,
           alpha: 1,
-          size: 1.5 + Math.random() * 2.5,
-          color: ['#ffd166', '#ff758f', '#fff', '#f4a261', '#ffbe0b'][Math.floor(Math.random() * 5)],
-          decay: 0.025 + Math.random() * 0.035
+          size: 2 + Math.random() * 2
         });
       }
     }
 
-    function animate() {
-      ctx.fillStyle = 'rgba(8, 3, 16, 0.22)';
-      ctx.fillRect(0, 0, width, height);
+    canvas.addEventListener('pointerdown', e => {
+      e.preventDefault();
+      flap();
+    });
 
+    let spawnTimer = 0;
+    function loop() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      if (running) {
+        lanternVy += gravity;
+        lanternY += lanternVy;
+
+        if (lanternY > canvas.height - 25) { lanternY = canvas.height - 25; lanternVy = 0; }
+        if (lanternY < 20) { lanternY = 20; lanternVy = 0; }
+
+        spawnTimer++;
+        if (spawnTimer % 65 === 0) {
+          const isHeart = Math.random() < 0.65;
+          items.push({
+            x: canvas.width + 20,
+            y: 35 + Math.random() * (canvas.height - 70),
+            type: isHeart ? 'heart' : 'cloud',
+            symbol: isHeart ? '💖' : '🌧️',
+            size: isHeart ? 22 : 26
+          });
+        }
+      }
+
+      // Draw lantern
+      ctx.save();
+      ctx.translate(55, lanternY);
+      ctx.font = '28px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.shadowColor = '#ffd166';
+      ctx.shadowBlur = 12;
+      ctx.fillText('🏮', 0, 0);
+      ctx.restore();
+
+      // Update & draw particles
       for (let i = particles.length - 1; i >= 0; i--) {
         const p = particles[i];
-        p.x += p.vx;
-        p.y += p.vy;
-        p.vy += 0.08; // gravity
-        p.alpha -= p.decay;
-
-        if (p.alpha <= 0) {
-          particles.splice(i, 1);
-          continue;
-        }
-
-        ctx.save();
-        ctx.globalAlpha = p.alpha;
-        ctx.fillStyle = p.color;
-        ctx.shadowColor = p.color;
-        ctx.shadowBlur = 8;
+        p.x += p.vx; p.y += p.vy; p.alpha -= 0.03;
+        if (p.alpha <= 0) { particles.splice(i, 1); continue; }
+        ctx.fillStyle = `rgba(255, 209, 102, ${p.alpha})`;
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
         ctx.fill();
-        ctx.restore();
       }
 
-      requestAnimationFrame(animate);
+      // Update items
+      for (let i = items.length - 1; i >= 0; i--) {
+        const item = items[i];
+        if (running) item.x -= 2.6;
+
+        ctx.font = `${item.size}px sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(item.symbol, item.x, item.y);
+
+        // Collision check
+        const dx = item.x - 55;
+        const dy = item.y - lanternY;
+        const dist = Math.hypot(dx, dy);
+
+        if (dist < 26) {
+          if (item.type === 'heart') {
+            score++;
+            $('#flyScore').textContent = score;
+            playChime();
+            triggerHaptic(60);
+            items.splice(i, 1);
+
+            if (score >= 6) {
+              running = false;
+              award('game-fly', 3, 'Sky Lantern Flight cleared with 6 hearts! +3 hearts 🏮💖');
+              overlay.style.display = 'grid';
+              overlay.innerHTML = `<span>🎉 YOU WON! 🎉<br />Sky Lantern reached the stars!<br /><small>Tap below to close</small></span>`;
+              return;
+            }
+          } else {
+            lives--;
+            $('#flyLives').textContent = '❤️'.repeat(Math.max(0, lives));
+            triggerHaptic(120);
+            items.splice(i, 1);
+
+            if (lives <= 0) {
+              running = false;
+              overlay.style.display = 'grid';
+              overlay.innerHTML = `<span>🌧️ Rain overwhelmed the lantern!<br /><small>Tap anywhere to try again</small></span>`;
+              return;
+            }
+          }
+        } else if (item.x < -30) {
+          items.splice(i, 1);
+        }
+      }
+
+      frameId = requestAnimationFrame(loop);
     }
-    animate();
+
+    loop();
+    activeGameCleanup = () => {
+      running = false;
+      cancelAnimationFrame(frameId);
+    };
+  }
+
+  // ==========================================================
+  // BRAND NEW GAME 2: DIYA TOWER STACKER (दीया टॉवर)
+  // ==========================================================
+  function startDiyaStacker() {
+    openModal(`
+      <div class="card-eyebrow">GAME 02 · TIMING & BALANCE</div>
+      <h3>Diya Tower Stacker 🪔</h3>
+      <p class="section-info">Tap screen at the exact moment to stack swinging golden diyas! Build a 5-tier Diwali tower to win.</p>
+      <div style="display:flex;justify-content:space-between;font-size:12px;font-weight:700;color:var(--gold);margin-bottom:8px;">
+        <span>Tiers Stacked: <b id="stackScore">0</b>/5</span>
+        <span>Goal: 5 Tiers ✨</span>
+      </div>
+      <div class="stack-arena-wrap">
+        <canvas id="stackCanvas"></canvas>
+      </div>
+      <div style="text-align:center;margin-top:10px;">
+        <button class="btn btn-primary btn-full" id="stackDropBtn">Tap Screen or Click to Drop Diya 🪔</button>
+      </div>
+    `);
+
+    const canvas = $('#stackCanvas');
+    const ctx = canvas.getContext('2d');
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width;
+    canvas.height = rect.height;
+
+    const diyaImg = new Image();
+    diyaImg.src = 'assets/svg/diya-ornate.svg';
+
+    let stacked = [{ x: canvas.width / 2 - 32, y: canvas.height - 45, w: 64, h: 42 }];
+    let swinging = { x: canvas.width / 2 - 32, y: 35, w: 64, h: 42, vx: 3.2 };
+    let isFalling = false;
+    let score = 0;
+    let frameId;
+
+    function drop() {
+      if (isFalling || score >= 5) return;
+      isFalling = true;
+      playTap();
+      triggerHaptic(40);
+    }
+
+    canvas.addEventListener('pointerdown', drop);
+    $('#stackDropBtn').addEventListener('click', drop);
+
+    function loop() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Altar Base
+      ctx.fillStyle = '#3a1854';
+      ctx.fillRect(20, canvas.height - 8, canvas.width - 40, 8);
+
+      // Draw stacked diyas
+      stacked.forEach(d => {
+        if (diyaImg.complete) ctx.drawImage(diyaImg, d.x, d.y, d.w, d.h);
+        else {
+          ctx.fillStyle = '#ffd166';
+          ctx.fillRect(d.x, d.y, d.w, d.h);
+        }
+      });
+
+      // Update swinging/falling diya
+      if (!isFalling) {
+        swinging.x += swinging.vx;
+        if (swinging.x > canvas.width - swinging.w - 15 || swinging.x < 15) {
+          swinging.vx = -swinging.vx;
+        }
+
+        // Hanging chain
+        ctx.strokeStyle = '#ffd166';
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([2, 2]);
+        ctx.beginPath();
+        ctx.moveTo(canvas.width / 2, 0);
+        ctx.lineTo(swinging.x + swinging.w / 2, swinging.y);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      } else {
+        swinging.y += 6.5; // drop speed
+        const topStacked = stacked[stacked.length - 1];
+
+        if (swinging.y >= topStacked.y - swinging.h + 8) {
+          // Check alignment
+          const diff = Math.abs(swinging.x - topStacked.x);
+          if (diff < 36) {
+            // Good stack!
+            score++;
+            $('#stackScore').textContent = score;
+            playChime();
+            triggerHaptic(80);
+            stacked.push({ x: swinging.x, y: topStacked.y - swinging.h + 8, w: swinging.w, h: swinging.h });
+
+            if (score >= 5) {
+              award('game-stacker', 3, 'Diya Tower completed! +3 hearts 🪔✨');
+              showToast('✨ Sacred Diya Tower fully stacked! Happy Diwali! ✨');
+              $('#stackDropBtn').disabled = true;
+              $('#stackDropBtn').textContent = 'Tower Completed! 💖';
+              return;
+            }
+
+            // Next tier
+            swinging = {
+              x: canvas.width / 2 - 32,
+              y: 35,
+              w: 64,
+              h: 42,
+              vx: (swinging.vx > 0 ? 1 : -1) * (3.2 + score * 0.45)
+            };
+            isFalling = false;
+          } else {
+            // Missed / Toppled
+            showToast('The diya slipped! Tap to try again ♡');
+            triggerHaptic(150);
+            score = 0;
+            $('#stackScore').textContent = '0';
+            stacked = [{ x: canvas.width / 2 - 32, y: canvas.height - 45, w: 64, h: 42 }];
+            swinging = { x: canvas.width / 2 - 32, y: 35, w: 64, h: 42, vx: 3.2 };
+            isFalling = false;
+          }
+        }
+      }
+
+      // Draw active diya
+      if (diyaImg.complete) ctx.drawImage(diyaImg, swinging.x, swinging.y, swinging.w, swinging.h);
+
+      frameId = requestAnimationFrame(loop);
+    }
+
+    loop();
+    activeGameCleanup = () => cancelAnimationFrame(frameId);
+  }
+
+  // ==========================================================
+  // BRAND NEW GAME 3: LOVE JACKPOT SLOT MACHINE (प्यार का जैकपॉट)
+  // ==========================================================
+  function startLoveSlotMachine() {
+    const symbols = ['🪔', '💖', '💍', '🌸', '🧸', '🎁'];
+
+    openModal(`
+      <div class="card-eyebrow">GAME 03 · CHANCE & ROMANCE</div>
+      <h3>Love Jackpot Slot 🎰</h3>
+      <p class="section-info">Pull the golden lever to spin the 3 reels! Hit 3 matching charms to win special couple promises.</p>
+      <div class="slot-machine-wrap">
+        <div class="slot-reels-box">
+          <div class="slot-reel" id="reel1">🪔</div>
+          <div class="slot-reel" id="reel2">💖</div>
+          <div class="slot-reel" id="reel3">🪔</div>
+        </div>
+        <div class="slot-result-banner" id="slotBanner">Tap 'SPIN FOR LOVE' to win Sona's jackpot!</div>
+        <button class="btn btn-primary btn-full btn-glow" id="slotSpinBtn">
+          <span>SPIN FOR LOVE 🎰</span>
+        </button>
+      </div>
+    `);
+
+    const r1 = $('#reel1'), r2 = $('#reel2'), r3 = $('#reel3');
+    const banner = $('#slotBanner');
+    const spinBtn = $('#slotSpinBtn');
+
+    spinBtn.addEventListener('click', () => {
+      spinBtn.disabled = true;
+      r1.classList.add('spinning');
+      r2.classList.add('spinning');
+      r3.classList.add('spinning');
+      banner.textContent = 'Reels spinning with love…';
+      playTap();
+      triggerHaptic(40);
+
+      let counter = 0;
+      const tickTimer = setInterval(() => {
+        counter++;
+        r1.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+        r2.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+        r3.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+        playSlotTick();
+
+        if (counter > 18) {
+          clearInterval(tickTimer);
+          r1.classList.remove('spinning');
+          r2.classList.remove('spinning');
+          r3.classList.remove('spinning');
+          spinBtn.disabled = false;
+
+          // Determine outcome (generous win rate for Sona!)
+          const pick = symbols[Math.floor(Math.random() * symbols.length)];
+          const winJackpot = Math.random() < 0.6; // 60% jackpot chance!
+
+          if (winJackpot) {
+            r1.textContent = pick;
+            r2.textContent = pick;
+            r3.textContent = pick;
+            const matchStr = pick + pick + pick;
+            const prize = C.slotPrizes.find(p => p.match === matchStr) || C.slotPrizes[0];
+            banner.innerHTML = `<b>🎉 ${prize.title}</b><br /><small>${prize.text}</small>`;
+            playChime();
+            triggerHaptic(100);
+            award('game-slot', 3, 'JACKPOT! Love slot matched! +3 hearts 🎰💖');
+          } else {
+            banner.textContent = 'Sweet Match! Kaushal awards you 10 forehead kisses & 1 infinite hug! ♡';
+            playTap();
+            award('game-slot', 1, 'Love slot spin completed! +1 heart ✨');
+          }
+        }
+      }, 90);
+    });
+  }
+
+  // ==========================================================
+  // BRAND NEW GAME 4: MAGIC RANGOLI & PHULJHADI (जादुई रंगोली)
+  // ==========================================================
+  function startRangoliArt() {
+    openModal(`
+      <div class="card-eyebrow">GAME 04 · KALEIDOSCOPE ART</div>
+      <h3>Magic Rangoli & Phuljhadi 🎨</h3>
+      <p class="section-info">Draw with your finger to create 6-fold radial glowing Rangoli patterns, or switch to sizzling fireworks!</p>
+      <div class="rangoli-draw-wrap">
+        <canvas id="rangoliCanvas"></canvas>
+      </div>
+      <div class="rangoli-toolbar">
+        <div style="display:flex;gap:6px;">
+          <button class="palette-btn" style="background:#ffd166;" data-color="#ffd166"></button>
+          <button class="palette-btn" style="background:#ff758f;" data-color="#ff758f"></button>
+          <button class="palette-btn" style="background:#4cc9f0;" data-color="#4cc9f0"></button>
+          <button class="palette-btn" style="background:#ffb703;" data-color="#ffb703"></button>
+        </div>
+        <button class="btn btn-xs btn-outline" id="clearRangoli">Clear Board</button>
+      </div>
+    `);
+
+    const canvas = $('#rangoliCanvas');
+    const ctx = canvas.getContext('2d');
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width;
+    canvas.height = rect.height;
+
+    let currentColor = '#ffd166';
+    let isDrawing = false;
+    let lastX = 0, lastY = 0;
+    const cx = canvas.width / 2, cy = canvas.height / 2;
+
+    $$('.palette-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        currentColor = btn.dataset.color;
+        playTap();
+      });
+    });
+
+    $('#clearRangoli').addEventListener('click', () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      playTap();
+    });
+
+    function drawLine(x1, y1, x2, y2) {
+      const angles = 6;
+      const step = (Math.PI * 2) / angles;
+
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.strokeStyle = currentColor;
+      ctx.lineWidth = 2.2;
+      ctx.lineCap = 'round';
+      ctx.shadowColor = currentColor;
+      ctx.shadowBlur = 8;
+
+      for (let i = 0; i < angles; i++) {
+        ctx.rotate(step);
+        ctx.beginPath();
+        ctx.moveTo(x1 - cx, y1 - cy);
+        ctx.lineTo(x2 - cx, y2 - cy);
+        ctx.stroke();
+
+        // Mirrored line for floral symmetry
+        ctx.beginPath();
+        ctx.moveTo(-(x1 - cx), y1 - cy);
+        ctx.lineTo(-(x2 - cx), y2 - cy);
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
 
     function handlePointer(e) {
-      const rect = canvas.getBoundingClientRect();
-      const x = (e.clientX || (e.touches && e.touches[0].clientX)) - rect.left;
-      const y = (e.clientY || (e.touches && e.touches[0].clientY)) - rect.top;
-      addSparks(x, y, 10);
-      playTap();
-      $('#sparklerHint').style.opacity = '0';
-      if (!state.awards.includes('sparkler-played')) {
-        award('sparkler-played', 1, 'Digital phuljhadi sparkling! +1 heart 🎇');
+      const r = canvas.getBoundingClientRect();
+      const x = (e.clientX || (e.touches && e.touches[0].clientX)) - r.left;
+      const y = (e.clientY || (e.touches && e.touches[0].clientY)) - r.top;
+
+      if (isDrawing) {
+        drawLine(lastX, lastY, x, y);
+        if (!state.awards.includes('game-rangoli')) {
+          award('game-rangoli', 3, 'Magic Rangoli pattern created! +3 hearts 🎨✨');
+        }
       }
+      lastX = x;
+      lastY = y;
     }
 
     canvas.addEventListener('pointerdown', e => {
       isDrawing = true;
-      handlePointer(e);
+      const r = canvas.getBoundingClientRect();
+      lastX = (e.clientX || (e.touches && e.touches[0].clientX)) - r.left;
+      lastY = (e.clientY || (e.touches && e.touches[0].clientY)) - r.top;
     });
     canvas.addEventListener('pointermove', e => {
       if (isDrawing) handlePointer(e);
     });
     window.addEventListener('pointerup', () => { isDrawing = false; });
-    canvas.addEventListener('touchmove', e => {
-      handlePointer(e);
-      e.preventDefault();
-    }, { passive: false });
+  }
 
-    $('#clearSparkler').addEventListener('click', () => {
-      particles = [];
-      ctx.clearRect(0, 0, width, height);
-      $('#sparklerHint').style.opacity = '1';
+  // ==========================================================
+  // BRAND NEW GAME 5: CELESTIAL HEART CONSTELLATION (तारामंडल)
+  // ==========================================================
+  function startConstellation() {
+    openModal(`
+      <div class="card-eyebrow">GAME 05 · STAR PUZZLE</div>
+      <h3>Celestial Heart Linker ✨</h3>
+      <p class="section-info">Tap the numbered stars in sequence (1 → 2 → 3 → 4 → 5 → 1) to trace Kaushal & Sona's celestial heart!</p>
+      <div class="constellation-wrap">
+        <canvas id="constCanvas"></canvas>
+      </div>
+      <div style="text-align:center;font-size:12px;color:var(--gold);margin-top:8px;" id="constStatus">
+        Tap Star #1 to begin tracing ✧
+      </div>
+    `);
+
+    const canvas = $('#constCanvas');
+    const ctx = canvas.getContext('2d');
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width;
+    canvas.height = rect.height;
+
+    const cx = canvas.width / 2, cy = canvas.height / 2;
+    // 5 Heart Nodes
+    const nodes = [
+      { id: 1, x: cx, y: cy - 45 },
+      { id: 2, x: cx + 55, y: cy - 75 },
+      { id: 3, x: cx + 70, y: cy - 15 },
+      { id: 4, x: cx, y: cy + 70 },
+      { id: 5, x: cx - 70, y: cy - 15 },
+      { id: 6, x: cx - 55, y: cy - 75 }
+    ];
+
+    let currentStep = 1;
+    let connected = [];
+    let frameId;
+
+    function render() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Connected lines
+      if (connected.length > 1) {
+        ctx.strokeStyle = '#ff758f';
+        ctx.lineWidth = 2.5;
+        ctx.shadowColor = '#ff758f';
+        ctx.shadowBlur = 12;
+        ctx.beginPath();
+        ctx.moveTo(connected[0].x, connected[0].y);
+        for (let i = 1; i < connected.length; i++) {
+          ctx.lineTo(connected[i].x, connected[i].y);
+        }
+        ctx.stroke();
+      }
+
+      // Draw nodes
+      nodes.forEach(n => {
+        const isDone = connected.some(c => c.id === n.id);
+        const isNext = n.id === currentStep;
+
+        ctx.fillStyle = isDone ? '#ff758f' : (isNext ? '#ffd166' : 'rgba(255,255,255,0.4)');
+        ctx.shadowColor = isNext ? '#ffd166' : '#ff758f';
+        ctx.shadowBlur = isNext ? 14 : 6;
+        ctx.beginPath();
+        ctx.arc(n.x, n.y, isNext ? 9 : 6, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#fff';
+        ctx.font = '10px DM Sans';
+        ctx.textAlign = 'center';
+        ctx.fillText(n.id, n.x, n.y - 12);
+      });
+
+      frameId = requestAnimationFrame(render);
+    }
+    render();
+
+    canvas.addEventListener('pointerdown', e => {
+      const r = canvas.getBoundingClientRect();
+      const x = (e.clientX || (e.touches && e.touches[0].clientX)) - r.left;
+      const y = (e.clientY || (e.touches && e.touches[0].clientY)) - r.top;
+
+      nodes.forEach(n => {
+        if (Math.hypot(n.x - x, n.y - y) < 22) {
+          if (n.id === currentStep) {
+            connected.push(n);
+            playChime();
+            triggerHaptic(40);
+            currentStep++;
+
+            if (currentStep > nodes.length) {
+              connected.push(nodes[0]); // close the heart loop
+              $('#constStatus').innerHTML = '<b>💖 Constellation linked! Kaushal & Sona written in the stars! 💖</b>';
+              award('game-constellation', 3, 'Celestial Heart Constellation linked! +3 hearts ✨💖');
+            } else {
+              $('#constStatus').textContent = `Good! Now tap Star #${currentStep} ✧`;
+            }
+          }
+        }
+      });
+    });
+
+    activeGameCleanup = () => cancelAnimationFrame(frameId);
+  }
+
+  // Games Dispatcher
+  function launchGame(id) {
+    playTap();
+    if (id === 'lantern-fly') return startSkyLanternFlight();
+    if (id === 'stacker') return startDiyaStacker();
+    if (id === 'slot') return startLoveSlotMachine();
+    if (id === 'rangoli-art') return startRangoliArt();
+    if (id === 'constellation') return startConstellation();
+  }
+
+  // ==========================================================
+  // SURPRISES DISPATCHER
+  // ==========================================================
+  function launchSurprise(id) {
+    playTap();
+    if (id === 'scratch') return openScratch();
+    if (id === 'gift') return openGift();
+    if (id === 'wheel') return openWheel();
+    if (id === 'coupons') return openCoupons();
+    if (id === 'password') return openPassword();
+    if (id === 'hug') return showHug();
+    if (id === 'audio') return openAudio();
+  }
+
+  // Scratch Card
+  function openScratch() {
+    const message = C.scratchMessages[Math.floor(Math.random() * C.scratchMessages.length)];
+    openModal(`
+      <div class="card-eyebrow">A SECRET GOLDEN NOTE</div>
+      <h3>Scratch & Reveal ✧</h3>
+      <p class="section-info">Use your finger to scratch off the golden metallic layer below!</p>
+      <div class="scratch-wrap">
+        <div class="scratch-reveal">${message}</div>
+        <canvas class="scratch-canvas" id="scratchCanvas"></canvas>
+      </div>
+    `);
+
+    const canvas = $('#scratchCanvas');
+    const ctx = canvas.getContext('2d');
+    const rect = canvas.getBoundingClientRect();
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    ctx.scale(dpr, dpr);
+
+    const grad = ctx.createLinearGradient(0, 0, rect.width, rect.height);
+    grad.addColorStop(0, '#ffd166');
+    grad.addColorStop(0.5, '#f4a261');
+    grad.addColorStop(1, '#ff758f');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, rect.width, rect.height);
+
+    ctx.fillStyle = 'rgba(20, 8, 30, 0.4)';
+    ctx.font = '700 12px DM Sans';
+    ctx.textAlign = 'center';
+    ctx.fillText('✨ SCRATCH WITH LOVE ✨', rect.width / 2, rect.height / 2);
+
+    let drawing = false, checks = 0, awarded = false;
+    const scratch = e => {
+      const box = canvas.getBoundingClientRect();
+      const x = (e.clientX || (e.touches && e.touches[0].clientX)) - box.left;
+      const y = (e.clientY || (e.touches && e.touches[0].clientY)) - box.top;
+      ctx.globalCompositeOperation = 'destination-out';
+      ctx.beginPath();
+      ctx.arc(x, y, 20, 0, Math.PI * 2);
+      ctx.fill();
+      checks++;
+      if (checks > 18 && !awarded) {
+        awarded = true;
+        award('surprise-scratch', 2, 'Hidden message revealed! +2 hearts 💌');
+      }
+    };
+
+    canvas.addEventListener('pointerdown', e => { drawing = true; scratch(e); });
+    canvas.addEventListener('pointermove', e => { if (drawing) scratch(e); });
+    window.addEventListener('pointerup', () => { drawing = false; });
+  }
+
+  // Mystery Gift Box
+  function openGift() {
+    const gift = C.giftMessages[Math.floor(Math.random() * C.giftMessages.length)];
+    openModal(`
+      <div class="card-eyebrow">A FESTIVE GIFT BOX</div>
+      <h3>Mystery Gift Box 🎁</h3>
+      <p class="section-info">Tap the gift box to untie the ribbon!</p>
+      <div style="text-align:center;padding:14px 0;">
+        <span class="gift-box-big" id="giftBox">🎁</span>
+        <h4 id="giftTitle" style="margin:10px 0 4px;font-size:20px;">Still wrapped tight…</h4>
+        <p id="giftBody" style="color:var(--text-muted);font-size:13px;margin-bottom:14px;">Tap button below to open!</p>
+        <button class="btn btn-primary" id="openGiftBtn">Unwrap Gift ✧</button>
+      </div>
+    `);
+
+    $('#openGiftBtn').addEventListener('click', () => {
+      playDiyaSound();
+      triggerHaptic(60);
+      const box = $('#giftBox');
+      box.classList.add('open');
+      box.textContent = '💖';
+      $('#giftTitle').textContent = gift.title;
+      $('#giftBody').textContent = gift.body;
+      $('#openGiftBtn').disabled = true;
+      $('#openGiftBtn').textContent = 'Gift Opened ♡';
+      award('surprise-gift', 2, 'Mystery gift box opened! +2 hearts 🎁');
     });
   }
 
-  // Sky Lantern Release System
-  function initSkyLantern() {
-    const fleet = $('#lanternFleet');
-    const select = $('#lanternWishSelect');
-    const customInput = $('#customWishInput');
-    const releaseBtn = $('#releaseLanternBtn');
+  // Spin Wheel
+  let wheelRot = 0;
+  function openWheel() {
+    openModal(`
+      <div class="card-eyebrow">ROMANTIC WHEEL</div>
+      <h3>Spin The Love Wheel 🎡</h3>
+      <p class="section-info">Whatever prize it lands on, you get to redeem it from Kaushal without argument!</p>
+      <div class="wheel-wrap">
+        <div class="wheel-pointer">▼</div>
+        <div class="love-wheel" id="loveWheel"></div>
+      </div>
+      <div class="wheel-result" id="wheelResult">Ready when you are, Buchua.</div>
+      <div style="display:flex;justify-content:center;margin-top:12px;">
+        <button class="btn btn-primary" id="spinWheelBtn">Spin Wheel ↻</button>
+      </div>
+    `);
 
-    select.addEventListener('change', () => {
-      if (select.value === 'custom') {
-        customInput.style.display = 'block';
-        customInput.focus();
+    $('#spinWheelBtn').addEventListener('click', () => {
+      const idx = Math.floor(Math.random() * C.wheelPrizes.length);
+      const seg = 360 / C.wheelPrizes.length;
+      wheelRot += 360 * 5 + (360 - idx * seg - seg / 2);
+      $('#loveWheel').style.transform = `rotate(${wheelRot}deg)`;
+      $('#spinWheelBtn').disabled = true;
+      $('#wheelResult').textContent = 'Spinning magic…';
+      playTap();
+
+      setTimeout(() => {
+        $('#wheelResult').textContent = `Your treat: ${C.wheelPrizes[idx]} ♡`;
+        $('#spinWheelBtn').disabled = false;
+        $('#spinWheelBtn').textContent = 'Spin Again ↻';
+        playChime();
+        award('surprise-wheel', 2, 'Love wheel spun! +2 hearts ✨');
+      }, 4100);
+    });
+  }
+
+  // Redeemable Coupons
+  function openCoupons() {
+    openModal(`
+      <div class="card-eyebrow">ROMANTIC PASSES</div>
+      <h3>Redeemable Love Coupons 🎟️</h3>
+      <p class="section-info">Tap 'Redeem' to stamp a coupon! Kaushal will honour it with all his heart.</p>
+      <div class="coupons-modal-grid">
+        ${C.coupons.map(coupon => {
+          const isRedeemed = state.redeemedCoupons.includes(coupon.id);
+          return `
+            <div class="coupon-item ${isRedeemed ? 'redeemed' : ''}" data-coupon-id="${coupon.id}">
+              <div class="coupon-top">
+                <span style="font-size:22px;">${coupon.icon}</span>
+                <span class="coupon-tag">${coupon.tag}</span>
+              </div>
+              <h4 class="coupon-title">${coupon.title}</h4>
+              <p class="coupon-desc">${coupon.desc}</p>
+              <button class="btn btn-xs btn-primary coupon-redeem-btn" ${isRedeemed ? 'disabled' : ''}>
+                ${isRedeemed ? 'Redeemed ♡' : 'Redeem Coupon 🎟️'}
+              </button>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    `);
+
+    $$('.coupon-redeem-btn').forEach(btn => {
+      btn.addEventListener('click', e => {
+        const item = e.target.closest('.coupon-item');
+        const cid = item.dataset.couponId;
+        if (state.redeemedCoupons.includes(cid)) return;
+
+        playTap();
+        triggerHaptic(70);
+        state.redeemedCoupons.push(cid);
+        item.classList.add('redeemed');
+        btn.disabled = true;
+        btn.textContent = 'Redeemed ♡';
+        award(`coupon-${cid}`, 1, 'Coupon redeemed! Kaushal will honour this with love ♡');
+      });
+    });
+  }
+
+  // Secret Room
+  function openPassword() {
+    openModal(`
+      <div class="card-eyebrow">A SECRET ROOM</div>
+      <h3>The Secret Room 🔐</h3>
+      <p class="section-info">A special nickname between us is the key. Hint: It starts with B and ends with A (Buchua)...</p>
+      <form class="secret-form" id="secretForm">
+        <input id="secretInput" type="text" autocomplete="off" placeholder="Enter secret word..." class="form-input" />
+        <button class="btn btn-primary" type="submit">Unlock</button>
+      </form>
+      <div id="secretResult" style="margin-top:14px;color:var(--pink-soft);font-family:var(--font-serif);font-style:italic;font-size:14.5px;"></div>
+    `);
+
+    $('#secretForm').addEventListener('submit', e => {
+      e.preventDefault();
+      const val = $('#secretInput').value.trim().toUpperCase();
+      const valid = val === String(C.secretPassword).toUpperCase() || val === 'SONA';
+
+      if (valid) {
+        playChime();
+        triggerHaptic(80);
+        $('#secretResult').innerHTML = `
+          <b>Secret Room Unlocked! 💖</b><br />
+          No matter how many stars shine in the universe, my eyes will always search for you. 
+          You are my safe harbour, my favourite laugh, and my greatest blessing. Happy Diwali, Buchua. ♡
+        `;
+        award('surprise-password', 2, 'Secret room unlocked! +2 hearts 🔐💖');
       } else {
-        customInput.style.display = 'none';
+        $('#secretResult').textContent = 'Not quite, my love! Hint: The sweet name I call you (Buchua) ♡';
       }
     });
+  }
 
-    releaseBtn.addEventListener('click', () => {
-      let wish = select.value === 'custom' ? customInput.value.trim() : select.value;
-      if (!wish) wish = "May Sona always smile brightly! ♡";
+  // Digital Hug
+  function showHug() {
+    playChime();
+    triggerHaptic(100);
+    const overlay = $('#hugOverlay');
+    $('#hugNickname').textContent = C.nickname || 'Buchua';
+    overlay.classList.add('show');
+    overlay.setAttribute('aria-hidden', 'false');
 
-      playDiyaSound();
+    const holder = $('#hugBurst');
+    holder.innerHTML = '';
+    for (let i = 0; i < 20; i++) {
+      const heart = document.createElement('span');
+      heart.className = 'hug-heart-fly';
+      heart.textContent = ['💖', '♥', '🌸', '🫂', '🤍'][i % 5];
+      heart.style.setProperty('--dx', `${(Math.random() - 0.5) * 80}vw`);
+      heart.style.animationDelay = `${Math.random() * 0.8}s`;
+      holder.appendChild(heart);
+    }
+    award('surprise-hug', 1, 'A tight, warm digital hug sent! +1 heart 🫂💖');
+  }
 
-      const lantern = document.createElement('div');
-      lantern.className = 'floating-lantern';
-      lantern.style.left = `${15 + Math.random() * 70}%`;
-      lantern.style.animationDuration = `${5.5 + Math.random() * 2.5}s`;
+  // Voice Note & Melody
+  function openAudio() {
+    openModal(`
+      <div class="card-eyebrow">ROMANTIC SOUNDS</div>
+      <h3>Voice Note & Melody 🎙️</h3>
+      <p class="section-info">Press play to listen to sweet music & Kaushal's melody for you.</p>
+      <div class="letter-paper" style="text-align:center;padding:16px;">
+        <span style="font-size:38px;color:var(--pink);">🎵</span><br />
+        A sweet romantic melody is ready for you.<br />
+        <small style="color:var(--text-muted);font-size:11px;">(You can also replace assets/audio/sona-voice-message.mp3 with your personal voice recording anytime!)</small>
+      </div>
+      <audio id="voicePlayer" controls style="width:100%;margin-top:14px;" src="assets/audio/sona-voice-message.mp3" preload="auto"></audio>
+    `);
 
-      lantern.innerHTML = `
-        <div class="lantern-shape">🏮</div>
-        <div class="lantern-wish-text">${wish}</div>
-      `;
-      fleet.appendChild(lantern);
-
-      lantern.addEventListener('animationend', () => lantern.remove());
-
-      award('lantern-released', 1, 'Your sky lantern is floating among the stars! 🏮✨');
-      showToast('Lantern released with your warm wish! 🏮✨');
-      if (select.value === 'custom') customInput.value = '';
+    $('#voicePlayer').addEventListener('play', () => {
+      award('surprise-audio', 1, 'Sweet melody / voice note played! +1 heart 🎙️💖');
     });
   }
 
-  // Polaroid Photo Wall & Uploader / Lightbox
+  // ==========================================================
+  // SCRAPBOOK POLAROID & LIGHTBOX
+  // ==========================================================
   function renderPhotos() {
     const grid = $('#photoGrid');
     grid.innerHTML = C.photos.map((photo, i) => {
@@ -527,24 +1213,23 @@
       const fallbackSrc = `assets/photos/${photo.svgFallback}`;
 
       return `
-        <article class="polaroid-card" data-photo-index="${i}">
-          <div class="polaroid-tape"></div>
-          <div class="polaroid-img-holder">
+        <article class="polaroid-card-item" data-photo-index="${i}">
+          <div class="polaroid-clip-badge"></div>
+          <div class="polaroid-photo-thumb">
             <img src="${initialSrc}" 
                  alt="${photo.title}" 
                  loading="lazy" 
                  onerror="if(this.src.indexOf('.svg') === -1) { this.src='${fallbackSrc}'; }" />
           </div>
-          <div class="polaroid-meta">
-            <h4 class="polaroid-title">${photo.title}</h4>
-            <p class="polaroid-caption">${photo.caption}</p>
-            <span class="polaroid-date">✦ ${photo.date || 'Memories'} ✦</span>
+          <div class="polaroid-card-caption">
+            <span class="polaroid-caption-title">${photo.title}</span>
+            <span class="polaroid-caption-sub">${photo.caption}</span>
           </div>
         </article>
       `;
     }).join('');
 
-    $$('.polaroid-card', grid).forEach(card => {
+    $$('.polaroid-card-item', grid).forEach(card => {
       card.addEventListener('click', () => {
         const idx = Number(card.dataset.photoIndex);
         openLightbox(idx);
@@ -600,7 +1285,7 @@
       reader.readAsDataURL(file);
     });
 
-    award('custom-photo-added', 2, 'New memories added to your Polaroid Wall! 📸💖');
+    award('custom-photo-added', 2, 'New memories previewed on your polaroid wall! 📸💖');
     showToast(`${files.length} photo(s) previewed on your polaroid wall! ✨`);
     e.target.value = '';
   });
@@ -609,18 +1294,22 @@
     state.customPhotos = {};
     save();
     renderPhotos();
-    showToast('Reset polaroids to default aesthetic illustrations! 🌸');
+    showToast('Reset to default aesthetic illustrations! 🌸');
   });
 
-  // Open When... Letters
+  // ==========================================================
+  // LETTERS & GALAXY & FINALE
+  // ==========================================================
   function renderLetters() {
     $('#letterGrid').innerHTML = C.letters.map(letter => `
-      <button class="letter-card" data-letter="${letter.id}">
-        <span class="letter-icon">${letter.icon}</span>
-        <h4>${letter.title}</h4>
-        <p>${letter.teaser}</p>
-        <span class="letter-read">${state.openedLetters.includes(letter.id) ? 'OPENED ♡' : 'OPEN LETTER →'}</span>
-      </button>
+      <div class="letter-mobile-card" data-letter="${letter.id}">
+        <span class="letter-card-icon">${letter.icon}</span>
+        <div class="letter-card-body">
+          <h4>${letter.title}</h4>
+          <p>${letter.teaser}</p>
+        </div>
+        <span class="letter-badge-status">${state.openedLetters.includes(letter.id) ? 'OPEN ♡' : 'READ →'}</span>
+      </div>
     `).join('');
   }
 
@@ -630,11 +1319,11 @@
     playTap();
 
     openModal(`
-      <div class="modal-eyebrow">A LETTER FOR THIS MOMENT · ${letter.icon}</div>
-      <h3>${letter.title}</h3>
+      <div class="card-eyebrow">A LETTER FOR THIS MOMENT · ${letter.icon}</div>
+      <h3 style="margin:6px 0 14px;">${letter.title}</h3>
       <div class="letter-paper">${letter.body}</div>
-      <div class="modal-actions" style="justify-content:center;">
-        <button class="btn btn-primary" id="letterDone">Keep this close to your heart 💗</button>
+      <div style="display:flex;justify-content:center;margin-top:16px;">
+        <button class="btn btn-primary" id="letterDone">Keep Close To Heart 💗</button>
       </div>
     `);
 
@@ -646,11 +1335,10 @@
     $('#letterDone').addEventListener('click', closeModal);
   }
 
-  // 11:11 Wish Galaxy
   function renderGalaxy() {
     const sky = $('#galaxySky');
     const positions = [
-      [15, 22], [32, 65], [44, 18], [58, 75], [74, 25], [84, 55],
+      [16, 22], [32, 65], [44, 18], [58, 75], [74, 25], [84, 55],
       [22, 50], [68, 48], [48, 86], [88, 18], [12, 78], [56, 38]
     ];
     sky.querySelectorAll('.galaxy-star').forEach(e => e.remove());
@@ -663,7 +1351,6 @@
       star.style.left = `${x}%`;
       star.style.top = `${y}%`;
       star.style.animationDelay = `${(i % 5) * 0.4}s`;
-      star.setAttribute('aria-label', 'Reveal a wish');
       star.addEventListener('click', () => revealWish(i));
       sky.appendChild(star);
     });
@@ -678,668 +1365,7 @@
     }
   }
 
-  // Games Launcher
-  function launchGame(id) {
-    playTap();
-    if (id === 'catch') return startCatchGame();
-    if (id === 'diya') return startDiyaGame();
-    if (id === 'quiz') return startQuiz();
-    if (id === 'hidden') return startHiddenHearts();
-    if (id === 'memory') return startMemoryGame();
-    if (id === 'fortune') return startFortuneCookie();
-  }
-
-  // Game 1: Catch My Love
-  function startCatchGame() {
-    openModal(`
-      <div class="modal-eyebrow">GAME 01 · QUICK REFLEXES</div>
-      <h3>Catch My Love ♡</h3>
-      <p class="modal-lead">Tap the falling hearts and festive sweets before they hit the ground. Catch at least 5 to win!</p>
-      <div class="arena-hud">
-        <span>Hearts Caught: <b id="gameScore">0</b></span>
-        <span>Time Left: <b id="gameTime">20</b>s</span>
-      </div>
-      <div class="arena" id="gameArena" aria-label="Tap falling items"></div>
-      <div class="modal-actions">
-        <button class="btn btn-primary" id="startCatch">Start Catching <span>💖</span></button>
-      </div>
-    `);
-
-    let score = 0, time = 20, spawnTimer, clockTimer, running = false;
-    const arena = $('#gameArena');
-
-    const finish = () => {
-      if (!running) return;
-      running = false;
-      clearInterval(spawnTimer);
-      clearInterval(clockTimer);
-      arena.innerHTML = '';
-      $('#startCatch').textContent = 'Play Again ↻';
-      $('#gameTime').textContent = '0';
-      $('#gameScore').textContent = score;
-
-      if (score >= 5) {
-        state.catchBest = Math.max(state.catchBest, score);
-        award('game-catch', 3, `Catch My Love cleared with ${score} points! +3 hearts 💖`);
-      } else {
-        showToast('Good try! Catch at least 5 items to earn your reward.');
-      }
-    };
-
-    const spawn = () => {
-      const item = document.createElement('button');
-      item.className = 'falling-item';
-      item.type = 'button';
-      item.textContent = ['💖', '♥', '🌸', '🪔', '🍬'][Math.floor(Math.random() * 5)];
-      item.style.left = `${6 + Math.random() * 84}%`;
-      item.style.top = '-35px';
-      item.style.animationDuration = `${1.8 + Math.random() * 1.1}s`;
-
-      item.addEventListener('click', () => {
-        if (!running) return;
-        score++;
-        $('#gameScore').textContent = score;
-        item.remove();
-        playTap();
-      });
-      item.addEventListener('animationend', () => item.remove());
-      arena.appendChild(item);
-    };
-
-    const start = () => {
-      clearInterval(spawnTimer);
-      clearInterval(clockTimer);
-      arena.innerHTML = '';
-      score = 0;
-      time = 20;
-      running = true;
-      $('#gameScore').textContent = '0';
-      $('#gameTime').textContent = '20';
-      $('#startCatch').textContent = 'Catching in progress…';
-      spawn();
-      spawnTimer = setInterval(spawn, 550);
-      clockTimer = setInterval(() => {
-        time--;
-        $('#gameTime').textContent = time;
-        if (time <= 0) finish();
-      }, 1000);
-    };
-
-    $('#startCatch').addEventListener('click', start);
-    activeGameCleanup = () => {
-      running = false;
-      clearInterval(spawnTimer);
-      clearInterval(clockTimer);
-    };
-  }
-
-  // Game 2: Diya Dash
-  function startDiyaGame() {
-    openModal(`
-      <div class="modal-eyebrow">GAME 02 · DIWALI CHALLENGE</div>
-      <h3>Diya Dash 🪔</h3>
-      <p class="modal-lead">Tap the golden diyas to collect them. Avoid the pesky rain clouds 🌧️! You have 20 seconds.</p>
-      <div class="arena-hud">
-        <span>Diyas: <b id="gameScore">0</b></span>
-        <span>Time Left: <b id="gameTime">20</b>s</span>
-      </div>
-      <div class="arena" id="gameArena"></div>
-      <div class="modal-actions">
-        <button class="btn btn-primary" id="startDiya">Start Diya Dash <span>🪔</span></button>
-      </div>
-    `);
-
-    let score = 0, time = 20, spawnTimer, clockTimer, running = false;
-    const arena = $('#gameArena');
-
-    const finish = () => {
-      if (!running) return;
-      running = false;
-      clearInterval(spawnTimer);
-      clearInterval(clockTimer);
-      arena.innerHTML = '';
-      $('#startDiya').textContent = 'Play Again ↻';
-      $('#gameTime').textContent = '0';
-
-      if (score >= 5) {
-        state.diyaBest = Math.max(state.diyaBest, score);
-        award('game-diya', 3, `Diya Dash completed with ${score} diyas! +3 hearts 🪔`);
-      } else {
-        showToast('Keep glowing! Collect 5 diyas for your reward.');
-      }
-    };
-
-    const spawn = () => {
-      const isCloud = Math.random() < 0.25;
-      const item = document.createElement('button');
-      item.type = 'button';
-      item.className = `falling-item ${isCloud ? 'obstacle' : ''}`;
-      item.textContent = isCloud ? '🌧️' : '🪔';
-      item.style.left = `${6 + Math.random() * 84}%`;
-      item.style.top = '-35px';
-      item.style.animationDuration = `${1.9 + Math.random() * 1.0}s`;
-
-      item.addEventListener('click', () => {
-        if (!running) return;
-        if (isCloud) {
-          score = Math.max(0, score - 1);
-        } else {
-          score++;
-          playDiyaSound();
-        }
-        $('#gameScore').textContent = score;
-        item.remove();
-      });
-      item.addEventListener('animationend', () => item.remove());
-      arena.appendChild(item);
-    };
-
-    const start = () => {
-      clearInterval(spawnTimer);
-      clearInterval(clockTimer);
-      arena.innerHTML = '';
-      score = 0;
-      time = 20;
-      running = true;
-      $('#gameScore').textContent = '0';
-      $('#gameTime').textContent = '20';
-      $('#startDiya').textContent = 'Dashing in progress…';
-      spawn();
-      spawnTimer = setInterval(spawn, 580);
-      clockTimer = setInterval(() => {
-        time--;
-        $('#gameTime').textContent = time;
-        if (time <= 0) finish();
-      }, 1000);
-    };
-
-    $('#startDiya').addEventListener('click', start);
-    activeGameCleanup = () => {
-      running = false;
-      clearInterval(spawnTimer);
-      clearInterval(clockTimer);
-    };
-  }
-
-  // Game 3: Love Quiz
-  function startQuiz() {
-    let current = 0, right = 0;
-
-    const render = () => {
-      if (current >= C.quiz.length) {
-        const note = right === C.quiz.length
-          ? 'Full marks! You know our story inside out, my smart Buchua! 🥹💖'
-          : `${right} out of ${C.quiz.length}! Our little story is still your favourite book, right? ♡`;
-
-        openModal(`
-          <div class="modal-eyebrow">GAME 03 · OUR ROMANTIC STORY</div>
-          <h3>Quiz Complete! 💖</h3>
-          <p class="modal-lead">${note}</p>
-          <div class="letter-paper" style="text-align:center;">
-            <span style="font-size:52px;color:var(--pink);">${right} / ${C.quiz.length}</span><br />
-            A story written in starlight.
-          </div>
-          <div class="modal-actions" style="justify-content:center;">
-            <button class="btn btn-primary" id="quizDone">Keep Exploring <span>♡</span></button>
-          </div>
-        `);
-        state.quizDone = true;
-        award('game-quiz', 3, 'Love Quiz completed! +3 hearts ✨');
-        $('#quizDone').addEventListener('click', closeModal);
-        return;
-      }
-
-      const q = C.quiz[current];
-      openModal(`
-        <div class="modal-eyebrow">QUESTION ${current + 1} OF ${C.quiz.length}</div>
-        <h3>Love Story Quiz 💌</h3>
-        <div class="quiz-progress"><span style="width:${((current) / C.quiz.length) * 100}%"></span></div>
-        <p class="modal-lead" style="font-family:var(--font-serif);font-size:20px;color:#fff;">${q.question}</p>
-        <div id="quizChoices">
-          ${q.choices.map((choice, i) => `
-            <button class="quiz-choice" data-choice="${i}">${choice}</button>
-          `).join('')}
-        </div>
-        <div class="quiz-feedback" id="quizFeedback"></div>
-        <div class="modal-actions">
-          <button class="btn btn-primary" id="quizNext" disabled>
-            ${current === C.quiz.length - 1 ? 'See Results' : 'Next Question'} <span>→</span>
-          </button>
-        </div>
-      `);
-
-      $$('.quiz-choice').forEach(button => button.addEventListener('click', () => {
-        if ($('#quizNext').disabled === false) return;
-        const selected = Number(button.dataset.choice);
-        const correct = selected === q.answer;
-        if (correct) right++;
-
-        $$('.quiz-choice').forEach((b, i) => {
-          b.disabled = true;
-          if (i === q.answer) {
-            b.style.borderColor = 'rgba(255, 209, 102, 0.8)';
-            b.style.background = 'rgba(255, 209, 102, 0.15)';
-          }
-          if (i === selected && !correct) {
-            b.style.borderColor = 'rgba(255, 80, 80, 0.8)';
-            b.style.background = 'rgba(255, 80, 80, 0.15)';
-          }
-        });
-
-        $('#quizFeedback').textContent = correct ? `✨ ${q.note}` : `Almost! ${q.note}`;
-        $('#quizNext').disabled = false;
-        playTap();
-      }));
-
-      $('#quizNext').addEventListener('click', () => {
-        current++;
-        render();
-      });
-    };
-
-    render();
-  }
-
-  // Game 4: Find Hidden Charms
-  function startHiddenHearts() {
-    const objects = [
-      { id: 'moon', icon: '🌙', label: 'Moonlight' },
-      { id: 'rangoli', icon: '🪔', label: 'Rangoli Diya' },
-      { id: 'lantern', icon: '🏮', label: 'Sky Lantern' },
-      { id: 'star', icon: '✦', label: 'Starlight' },
-      { id: 'gift', icon: '🎁', label: 'Gift Ribbon' }
-    ];
-
-    openModal(`
-      <div class="modal-eyebrow">GAME 04 · TREASURE HUNT</div>
-      <h3>Find Hidden Charms ♡</h3>
-      <p class="modal-lead">Five lucky keepsakes are hiding inside our universe. Tap each one to uncover its hidden love charm!</p>
-      <div class="arena-hud">
-        <span>Found: <b id="foundCount">${state.found.length}</b> / 5</span>
-        <span>Look closely ✧</span>
-      </div>
-      <div class="hidden-hunt">
-        ${objects.map(o => `
-          <button class="hunt-object ${state.found.includes(o.id) ? 'found' : ''}" data-hunt="${o.id}" ${state.found.includes(o.id) ? 'disabled' : ''}>
-            <span>${state.found.includes(o.id) ? '💖' : o.icon}</span>
-            <small>${state.found.includes(o.id) ? 'FOUND ♡' : o.label}</small>
-          </button>
-        `).join('')}
-      </div>
-      <div class="quiz-feedback" id="huntMessage"></div>
-    `);
-
-    $$('[data-hunt]').forEach(button => button.addEventListener('click', () => {
-      const id = button.dataset.hunt;
-      if (state.found.includes(id)) return;
-      state.found.push(id);
-      button.classList.add('found');
-      button.disabled = true;
-      button.innerHTML = `<span>💖</span><small>FOUND ♡</small>`;
-      $('#foundCount').textContent = state.found.length;
-      $('#huntMessage').textContent = C.hiddenHeartMessages[state.found.length - 1];
-      playChime();
-      award(`hidden-${id}`, 1, 'A hidden love charm found! +1 heart 💖');
-
-      if (state.found.length === 5) {
-        $('#huntMessage').textContent = 'You found every hidden charm in our little universe! You found all my love too. 💖';
-      }
-    }));
-  }
-
-  // Game 5: Memory Match
-  function startMemoryGame() {
-    const icons = ['🪔', '💖', '🌙', '🌸', '🎁', '🧸'];
-    let cards = [...icons, ...icons].map((icon, i) => ({ id: i, icon, pair: icon }));
-
-    for (let i = cards.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [cards[i], cards[j]] = [cards[j], cards[i]];
-    }
-
-    let first = null, lock = false, matches = 0, moves = 0;
-
-    openModal(`
-      <div class="modal-eyebrow">GAME 05 · MEMORY MATCH</div>
-      <h3>Little Memory Match ♡</h3>
-      <p class="modal-lead">Find all 6 matching romantic pairs. Tap two cards at a time to flip them over!</p>
-      <div class="arena-hud">
-        <span>Pairs Found: <b id="matchCount">0</b> / 6</span>
-        <span>Moves Made: <b id="moveCount">0</b></span>
-      </div>
-      <div class="memory-board" id="memoryBoard">
-        ${cards.map(card => `
-          <button class="memory-card" data-card="${card.id}" aria-label="Flip Card">?</button>
-        `).join('')}
-      </div>
-      <div class="quiz-feedback" id="memoryMessage"></div>
-    `);
-
-    const board = $('#memoryBoard');
-    $$('[data-card]', board).forEach(button => button.addEventListener('click', () => {
-      if (lock || button.classList.contains('flipped') || button.classList.contains('matched')) return;
-      const card = cards.find(c => c.id === Number(button.dataset.card));
-      button.classList.add('flipped');
-      button.textContent = card.icon;
-      playTap();
-
-      if (!first) {
-        first = { button, card };
-        return;
-      }
-
-      moves++;
-      $('#moveCount').textContent = moves;
-
-      if (first.card.pair === card.pair) {
-        button.classList.add('matched');
-        first.button.classList.add('matched');
-        first = null;
-        matches++;
-        $('#matchCount').textContent = matches;
-        playChime();
-
-        if (matches === 6) {
-          $('#memoryMessage').textContent = 'All 6 pairs matched! You have the sweetest and sharpest mind. ✨';
-          state.memoryDone = true;
-          award('game-memory', 4, 'Memory Match cleared! +4 hearts 💖');
-        }
-      } else {
-        lock = true;
-        const previous = first;
-        first = null;
-        setTimeout(() => {
-          previous.button.classList.remove('flipped');
-          previous.button.textContent = '?';
-          button.classList.remove('flipped');
-          button.textContent = '?';
-          lock = false;
-        }, 750);
-      }
-    }));
-  }
-
-  // Game 6: Magic Love Fortune Cookie
-  function startFortuneCookie() {
-    const fortunes = C.fortunes || [
-      "Your smile lights up Kaushal's entire world.",
-      "You are loved far more deeply than words could ever describe."
-    ];
-    const picked = fortunes[Math.floor(Math.random() * fortunes.length)];
-
-    openModal(`
-      <div class="modal-eyebrow">GAME 06 · SWEET COMPLIMENT</div>
-      <h3>Magic Love Fortune 🥠</h3>
-      <p class="modal-lead">Tap the golden fortune cookie to crack it open and reveal Sona's secret compliment!</p>
-      <div class="gift-reveal">
-        <span class="gift-box-big" id="fortuneCookie" style="cursor:pointer;">🥠</span>
-        <h4 id="fortuneTitle">Tap to Crack Cookie!</h4>
-        <p id="fortuneBody" style="font-family:var(--font-serif);font-size:18px;color:#fce4ee;margin:14px 0;"></p>
-        <button class="btn btn-primary" id="openCookieBtn">Crack Open <span>✨</span></button>
-      </div>
-    `);
-
-    const openCookie = () => {
-      playDiyaSound();
-      $('#fortuneCookie').textContent = '🥠✨';
-      $('#fortuneCookie').classList.add('open');
-      $('#fortuneTitle').textContent = 'A Sweet Truth For Sona:';
-      $('#fortuneBody').textContent = `“${picked}”`;
-      $('#openCookieBtn').disabled = true;
-      $('#openCookieBtn').textContent = 'Cookie Cracked ♡';
-      award('game-fortune', 2, 'Magic Love Fortune cracked open! +2 hearts 🥠✨');
-    };
-
-    $('#openCookieBtn').addEventListener('click', openCookie);
-    $('#fortuneCookie').addEventListener('click', openCookie);
-  }
-
-  // Surprises Launcher
-  function launchSurprise(id) {
-    playTap();
-    if (id === 'scratch') return openScratch();
-    if (id === 'gift') return openGift();
-    if (id === 'wheel') return openWheel();
-    if (id === 'coupons') return openCoupons();
-    if (id === 'password') return openPassword();
-    if (id === 'hug') return showHug();
-    if (id === 'audio') return openAudio();
-  }
-
-  // Surprise 1: Scratch & Reveal Card
-  function openScratch() {
-    const message = C.scratchMessages[Math.floor(Math.random() * C.scratchMessages.length)];
-    openModal(`
-      <div class="modal-eyebrow">A SECRET GOLDEN NOTE</div>
-      <h3>Scratch & Reveal ✧</h3>
-      <p class="modal-lead">Use your mouse or finger to scratch off the golden metallic layer below!</p>
-      <div class="scratch-wrap">
-        <div class="scratch-reveal">${message}</div>
-        <canvas class="scratch-canvas" id="scratchCanvas"></canvas>
-      </div>
-      <p class="section-subtitle" style="text-align:center;margin-top:12px;">Keep scratching to illuminate the hidden words ♡</p>
-    `);
-
-    const canvas = $('#scratchCanvas');
-    const ctx = canvas.getContext('2d');
-    const rect = canvas.getBoundingClientRect();
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    canvas.width = rect.width * dpr;
-    canvas.height = rect.height * dpr;
-    ctx.scale(dpr, dpr);
-
-    const grad = ctx.createLinearGradient(0, 0, rect.width, rect.height);
-    grad.addColorStop(0, '#ffd166');
-    grad.addColorStop(0.5, '#f4a261');
-    grad.addColorStop(1, '#ff758f');
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, rect.width, rect.height);
-
-    ctx.fillStyle = 'rgba(26, 11, 38, 0.35)';
-    ctx.font = '700 13px DM Sans';
-    ctx.textAlign = 'center';
-    ctx.fillText('✨ SCRATCH HERE WITH LOVE ✨', rect.width / 2, rect.height / 2);
-
-    let drawing = false, checks = 0, awarded = false;
-    const scratch = e => {
-      const box = canvas.getBoundingClientRect();
-      const x = (e.clientX || (e.touches && e.touches[0].clientX)) - box.left;
-      const y = (e.clientY || (e.touches && e.touches[0].clientY)) - box.top;
-      ctx.globalCompositeOperation = 'destination-out';
-      ctx.beginPath();
-      ctx.arc(x, y, 22, 0, Math.PI * 2);
-      ctx.fill();
-      checks++;
-      if (checks > 18 && !awarded) {
-        awarded = true;
-        award('surprise-scratch', 2, 'Hidden message revealed! +2 hearts 💌');
-      }
-    };
-
-    canvas.addEventListener('pointerdown', e => { drawing = true; scratch(e); });
-    canvas.addEventListener('pointermove', e => { if (drawing) scratch(e); });
-    window.addEventListener('pointerup', () => { drawing = false; });
-  }
-
-  // Surprise 2: Mystery Gift Box
-  function openGift() {
-    const gift = C.giftMessages[Math.floor(Math.random() * C.giftMessages.length)];
-    openModal(`
-      <div class="modal-eyebrow">A FESTIVE GIFT BOX</div>
-      <h3>Mystery Gift Box 🎁</h3>
-      <p class="modal-lead">A little treat picked directly from Kaushal's heart. Tap the box to untie the ribbon!</p>
-      <div class="gift-reveal">
-        <span class="gift-box-big" id="giftBox">🎁</span>
-        <h4 id="giftTitle">Still wrapped tight…</h4>
-        <p id="giftBody">Tap the button to open it!</p>
-        <button class="btn btn-primary" id="openGiftButton">Unwrap My Gift <span>✧</span></button>
-      </div>
-    `);
-
-    $('#openGiftButton').addEventListener('click', () => {
-      playDiyaSound();
-      const box = $('#giftBox');
-      box.classList.add('open');
-      box.textContent = '💖';
-      $('#giftTitle').textContent = gift.title;
-      $('#giftBody').textContent = gift.body;
-      $('#openGiftButton').disabled = true;
-      $('#openGiftButton').textContent = 'Gift Opened ♡';
-      award('surprise-gift', 2, 'Mystery gift box opened! +2 hearts 🎁');
-    });
-  }
-
-  // Surprise 3: Spin The Wheel of Love
-  let lastRotation = 0;
-  function openWheel() {
-    openModal(`
-      <div class="modal-eyebrow">LET FATE CHOOSE A CUTE TREAT</div>
-      <h3>Spin The Love Wheel 🎡</h3>
-      <p class="modal-lead">Whatever it lands on, you get to redeem it from Kaushal without any arguments!</p>
-      <div class="wheel-wrap">
-        <div class="wheel-pointer">▼</div>
-        <div class="love-wheel" id="loveWheel"></div>
-      </div>
-      <div class="wheel-result" id="wheelResult">Ready when you are, Buchua.</div>
-      <div class="modal-actions" style="justify-content:center;">
-        <button class="btn btn-primary" id="spinWheel">Spin For Love <span>↻</span></button>
-      </div>
-    `);
-
-    $('#spinWheel').addEventListener('click', () => {
-      const idx = Math.floor(Math.random() * C.wheelPrizes.length);
-      const segment = 360 / C.wheelPrizes.length;
-      lastRotation += 360 * 5 + (360 - idx * segment - segment / 2);
-      $('#loveWheel').style.transform = `rotate(${lastRotation}deg)`;
-      $('#spinWheel').disabled = true;
-      $('#wheelResult').textContent = 'Spinning the magic wheel…';
-
-      setTimeout(() => {
-        $('#wheelResult').textContent = `Your treat: ${C.wheelPrizes[idx]} ♡`;
-        $('#spinWheel').disabled = false;
-        $('#spinWheel').textContent = 'Spin Again ↻';
-        award('surprise-wheel', 2, 'Love Wheel spun! +2 hearts ✨');
-      }, 4200);
-    });
-  }
-
-  // Surprise 4: Redeemable Love Coupons
-  function openCoupons() {
-    openModal(`
-      <div class="modal-eyebrow">EXCLUSIVE LOVE PASSES</div>
-      <h3>Redeemable Love Coupons 🎟️</h3>
-      <p class="modal-lead">Special vouchers Sona can redeem anytime. Tap 'Redeem' to stamp a coupon!</p>
-      <div class="coupons-modal-grid">
-        ${C.coupons.map(coupon => {
-          const isRedeemed = state.redeemedCoupons.includes(coupon.id);
-          return `
-            <div class="coupon-item ${isRedeemed ? 'redeemed' : ''}" data-coupon-id="${coupon.id}">
-              <div class="coupon-top">
-                <span class="coupon-icon">${coupon.icon}</span>
-                <span class="coupon-tag">${coupon.tag}</span>
-              </div>
-              <h4 class="coupon-title">${coupon.title}</h4>
-              <p class="coupon-desc">${coupon.desc}</p>
-              <p class="coupon-fine">${coupon.finePrint}</p>
-              <button class="btn btn-xs btn-primary coupon-redeem-btn" ${isRedeemed ? 'disabled' : ''}>
-                ${isRedeemed ? 'Redeemed ♡' : 'Redeem Now 🎟️'}
-              </button>
-            </div>
-          `;
-        }).join('')}
-      </div>
-    `);
-
-    $$('.coupon-redeem-btn').forEach(btn => {
-      btn.addEventListener('click', e => {
-        const item = e.target.closest('.coupon-item');
-        const cid = item.dataset.couponId;
-        if (state.redeemedCoupons.includes(cid)) return;
-
-        playStampSound();
-        state.redeemedCoupons.push(cid);
-        item.classList.add('redeemed');
-        btn.disabled = true;
-        btn.textContent = 'Redeemed ♡';
-        award(`coupon-${cid}`, 1, 'Coupon redeemed! Kaushal will honour it wholeheartedly ♡');
-      });
-    });
-  }
-
-  // Surprise 5: Secret Room (Password Protected)
-  function openPassword() {
-    openModal(`
-      <div class="modal-eyebrow">A ROOM ONLY YOU CAN ENTER</div>
-      <h3>The Secret Room 🔐</h3>
-      <p class="modal-lead">A tiny word between us is the key. Hint: Think of the sweet nickname Kaushal calls you…</p>
-      <form class="secret-form" id="secretForm">
-        <input id="secretInput" type="text" autocomplete="off" placeholder="Enter secret word (e.g. BUCHUA)" class="form-input" />
-        <button class="btn btn-primary" type="submit">Unlock</button>
-      </form>
-      <div class="secret-result" id="secretResult"></div>
-    `);
-
-    $('#secretForm').addEventListener('submit', e => {
-      e.preventDefault();
-      const val = $('#secretInput').value.trim().toUpperCase();
-      const valid = val === String(C.secretPassword).toUpperCase() || val === 'SONA';
-
-      if (valid) {
-        playChime();
-        $('#secretResult').innerHTML = `
-          <b>Secret Room Unlocked! 💖</b><br />
-          No matter how many stars shine in the universe, my eyes will always search for you. 
-          You are my safe harbour, my favourite laugh, and my greatest blessing. Happy Diwali, Buchua. ♡
-        `;
-        award('surprise-password', 2, 'Secret room unlocked! +2 hearts 🔐💖');
-      } else {
-        $('#secretResult').textContent = 'Not quite, my love! Hint: It starts with B and ends with A (Buchua) ♡';
-      }
-    });
-  }
-
-  // Surprise 6: Digital Hug
-  function showHug() {
-    playChime();
-    const overlay = $('#hugOverlay');
-    $('#hugNickname').textContent = C.nickname || 'Buchua';
-    overlay.classList.add('show');
-    overlay.setAttribute('aria-hidden', 'false');
-
-    const holder = $('#hugBurst');
-    holder.innerHTML = '';
-    for (let i = 0; i < 24; i++) {
-      const heart = document.createElement('span');
-      heart.className = 'hug-heart';
-      heart.textContent = ['💖', '♥', '🌸', '🫂', '🤍'][i % 5];
-      heart.style.setProperty('--dx', `${(Math.random() - 0.5) * 85}vw`);
-      heart.style.animationDelay = `${Math.random() * 0.9}s`;
-      holder.appendChild(heart);
-    }
-    award('surprise-hug', 1, 'A tight, warm digital hug sent! +1 heart 🫂💖');
-  }
-
-  // Surprise 7: Voice Note & Sweet Melody
-  function openAudio() {
-    openModal(`
-      <div class="modal-eyebrow">A PIECE OF MY HEART IN SOUND</div>
-      <h3>Voice Note & Sweet Melody 🎙️</h3>
-      <p class="modal-lead">For the quiet moments when you want to feel Kaushal right beside you.</p>
-      <div class="letter-paper" style="text-align:center;">
-        <span style="font-size:44px;color:var(--pink);">🎵</span><br />
-        A sweet instrumental melody is ready for you.<br />
-        <small style="color:var(--text-muted);font-size:12px;">(You can also replace assets/audio/sona-voice-message.mp3 with your personal voice recording anytime!)</small>
-      </div>
-      <audio id="voicePlayer" controls style="width:100%;margin-top:16px;" src="assets/audio/sona-voice-message.mp3" preload="auto"></audio>
-    `);
-
-    const player = $('#voicePlayer');
-    player.addEventListener('play', () => {
-      award('surprise-audio', 1, 'Sweet melody / voice note played! +1 heart 🎙️💖');
-    });
-  }
-
-  // Secret Finale Letter & Grand Fireworks
+  // Secret Finale
   function openFinale() {
     if (state.hearts < FINAL_TARGET) {
       showToast(`The grand finale is waiting for ${FINAL_TARGET} hearts! You have ${state.hearts}. ♡`);
@@ -1348,11 +1374,11 @@
 
     const message = C.finalLetter.replaceAll('{{from}}', C.from);
     openModal(`
-      <div class="modal-eyebrow" style="text-align:center;">THE FINAL PAGE OF OUR LITTLE UNIVERSE</div>
-      <h3 style="text-align:center;">${C.finalLetterTitle} ✨</h3>
-      <p class="modal-lead" style="text-align:center;">A letter from ${C.from}, written with all the love in the universe.</p>
+      <div class="card-eyebrow" style="text-align:center;">THE FINAL PAGE OF OUR LITTLE UNIVERSE</div>
+      <h3 style="text-align:center;margin:6px 0 14px;">${C.finalLetterTitle} ✨</h3>
+      <p class="section-info" style="text-align:center;">A letter from ${C.from}, written with all the love in the universe.</p>
       <div class="letter-paper">${message}</div>
-      <div class="modal-actions" style="justify-content:center;">
+      <div style="display:flex;justify-content:center;margin-top:16px;">
         <button class="btn btn-primary" id="fireworksButton">
           <span>Make The Sky Sparkle 🎆</span>
         </button>
@@ -1364,11 +1390,12 @@
 
   function startFireworks() {
     playChime();
+    triggerHaptic(150);
     const layer = document.createElement('div');
     layer.style.cssText = 'position:fixed;inset:0;z-index:9999;pointer-events:none;overflow:hidden;';
     document.body.appendChild(layer);
 
-    for (let i = 0; i < 85; i++) {
+    for (let i = 0; i < 70; i++) {
       const spark = document.createElement('i');
       spark.textContent = ['✦', '✧', '🎆', '💖', '🪔', '✨'][i % 6];
       spark.style.cssText = `
@@ -1397,7 +1424,7 @@
     showToast('Happy Diwali, My Sona. Keep shining brighter than every star! 💖✨');
   }
 
-  // Background Ambient Canvas Particles
+  // Ambient Star Dust Particles
   function initAmbientCanvas() {
     const canvas = $('#ambientCanvas');
     if (!canvas) return;
@@ -1412,13 +1439,13 @@
     resize();
     window.addEventListener('resize', resize);
 
-    for (let i = 0; i < 45; i++) {
+    for (let i = 0; i < 35; i++) {
       particles.push({
         x: Math.random() * window.innerWidth,
         y: Math.random() * window.innerHeight,
-        r: 0.8 + Math.random() * 2.2,
-        vy: -0.15 - Math.random() * 0.35,
-        vx: (Math.random() - 0.5) * 0.2,
+        r: 0.8 + Math.random() * 2,
+        vy: -0.15 - Math.random() * 0.3,
+        vx: (Math.random() - 0.5) * 0.15,
         alpha: Math.random(),
         da: 0.008 + Math.random() * 0.012
       });
@@ -1440,7 +1467,7 @@
         ctx.globalAlpha = Math.max(0.1, p.alpha);
         ctx.fillStyle = '#ffd166';
         ctx.shadowColor = '#ffd166';
-        ctx.shadowBlur = 6;
+        ctx.shadowBlur = 5;
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
         ctx.fill();
@@ -1452,49 +1479,58 @@
     animate();
   }
 
-  // Setup Event Listeners
+  // Bottom Navigation Active State Handler
+  function initBottomNav() {
+    const tabs = $$('.dock-tab');
+    window.addEventListener('scroll', () => {
+      const scrollY = window.scrollY;
+      const sections = ['home', 'ceremony', 'games', 'memories', 'surprises'];
+      for (const id of sections) {
+        const el = document.getElementById(id);
+        if (el) {
+          const top = el.offsetTop - 120;
+          const height = el.offsetHeight;
+          if (scrollY >= top && scrollY < top + height) {
+            tabs.forEach(t => t.classList.toggle('active', t.dataset.tab === id));
+            break;
+          }
+        }
+      }
+    });
+
+    tabs.forEach(t => {
+      t.addEventListener('click', () => {
+        playTap();
+        triggerHaptic(25);
+      });
+    });
+  }
+
+  // Event Listeners
   function setupEventListeners() {
-    // Welcome Enter
     const enterUniverse = () => {
       playTap();
       playDiyaSound();
+      triggerHaptic(60);
       $('#welcomeScreen').classList.add('leaving');
       $('#siteShell').classList.add('visible');
       $('#siteShell').setAttribute('aria-hidden', 'false');
-      setTimeout(() => { $('#welcomeScreen').style.display = 'none'; }, 850);
-      showToast(`Welcome to your festive universe, ${C.nickname || 'Sona'}! 💖✨`);
+      setTimeout(() => { $('#welcomeScreen').style.display = 'none'; }, 800);
+      showToast(`Welcome to your universe, ${C.nickname || 'Sona'}! 💖✨`);
       playMusic();
     };
 
     $('#enterButton').addEventListener('click', enterUniverse);
     $('#welcomeDiyaAction').addEventListener('click', enterUniverse);
-    $('#welcomeDiyaAction').addEventListener('keydown', e => {
-      if (e.key === 'Enter' || e.key === ' ') enterUniverse();
-    });
 
-    // Music Toggles
     $('#musicToggle').addEventListener('click', toggleMusic);
-    $('#dockPlayBtn').addEventListener('click', toggleMusic);
-    $('#dockNextBtn').addEventListener('click', nextTrack);
-
-    // Sound FX Toggle
     $('#soundToggle').addEventListener('click', () => {
       window.sonaSoundEnabled = !window.sonaSoundEnabled;
       $('#soundIcon').textContent = window.sonaSoundEnabled ? '🔔' : '🔕';
-      $('#soundToggle').classList.toggle('active', !window.sonaSoundEnabled);
-      showToast(window.sonaSoundEnabled ? 'Sound effects enabled! 🔔' : 'Sound effects muted. 🔕');
+      $('#soundToggle').classList.toggle('muted', !window.sonaSoundEnabled);
+      showToast(window.sonaSoundEnabled ? 'Sound effects on! 🔔' : 'Sound effects muted. 🔕');
     });
 
-    // Mobile Menu
-    const drawer = $('#mobileNavDrawer');
-    $('#mobileMenuBtn').addEventListener('click', () => {
-      drawer.classList.toggle('open');
-    });
-    $$('.mobile-nav-link').forEach(link => {
-      link.addEventListener('click', () => drawer.classList.remove('open'));
-    });
-
-    // Global Modal & Overlays
     $('#modalClose').addEventListener('click', closeModal);
     $('#modal').addEventListener('click', e => {
       if (e.target === $('#modal')) closeModal();
@@ -1512,17 +1548,13 @@
 
     $('#finaleButton').addEventListener('click', openFinale);
 
-    // Hero Diyas Click
-    $('#heroDiyaLeft').addEventListener('click', () => {
+    $('#heroCenterDiya').addEventListener('click', () => {
       playDiyaSound();
-      showToast('The flame of love burns steady and bright! 🪔✨');
-    });
-    $('#heroDiyaRight').addEventListener('click', () => {
-      playDiyaSound();
-      showToast('Another diya glowing for Sona! 🪔✨');
+      triggerHaptic(50);
+      showToast('The golden flame of our love burns steady and warm! 🪔✨');
     });
 
-    // Global Delegated Clicks
+    // Delegated Clicks
     document.addEventListener('click', e => {
       const gameBtn = e.target.closest('[data-open-game]');
       const surpriseBtn = e.target.closest('[data-surprise]');
@@ -1534,7 +1566,7 @@
     });
   }
 
-  // Initialization
+  // App Init
   function init() {
     $('#welcomeName').textContent = `My ${C.name}`;
     $('#heroName').textContent = C.name;
@@ -1545,17 +1577,15 @@
     setTrack(0);
     initLoveTimer();
     renderDiyaCeremony();
-    initSparkler();
-    initSkyLantern();
     renderPhotos();
     renderLetters();
     renderGalaxy();
     initAmbientCanvas();
+    initBottomNav();
     updateProgress();
     setupEventListeners();
   }
 
-  // Start after DOM load
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
   } else {

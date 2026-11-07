@@ -1,6 +1,6 @@
 /*
-  SONA'S DIWALI UNIVERSE - PERSONALISATION & CONTENT
-  Fully customizable romantic & festive Diwali universe for Sona & Kaushal.
+  SONA'S DIWALI UNIVERSE - PERSONALISATION & CONTENT (MOBILE-FIRST EDITION)
+  Handcrafted with love for Sona by Kaushal.
 */
 window.SONA_CONTENT = {
   name: "Sona",
@@ -17,9 +17,9 @@ window.SONA_CONTENT = {
   ],
 
   finalLetterTitle: "My favourite light",
-  finalLetter: `My Sona,\n\nHappy Diwali, Buchua. 💗\n\nI wanted to give you something a little different this year — something you could explore, play with, laugh at and keep as a tiny forever memory. So I built this little universe for you. Every diya, every star and every silly game has one simple thought behind it: I hope you keep smiling.\n\nFrom our first hello on 5 May 2025 to the day our little story became official on 28 June 2025, you have become such an irreplaceable part of my world. I may not always have the perfect words, but I will always have an infinite number of reasons to love you and wish you happiness.\n\nMay this Diwali bring you peace when days feel heavy, courage when things feel difficult, and a thousand reasons to smile. Wherever life takes us, I want to keep collecting little moments with you.\n\nYou are my favourite reason to believe in magic.\n\nHappy Diwali, my Sona. Keep shining brighter than every star tonight.\n\nForever yours,\n{{from}} ♡`,
+  finalLetter: `My Sona,\n\nHappy Diwali, Buchua. 💗\n\nI wanted to give you something a little different this year — something you could explore on your phone, play with, laugh at and keep as a tiny forever memory. So I built this little universe for you. Every diya, every star and every silly game has one simple thought behind it: I hope you keep smiling.\n\nFrom our first hello on 5 May 2025 to the day our little story became official on 28 June 2025, you have become such an irreplaceable part of my world. I may not always have the perfect words, but I will always have an infinite number of reasons to love you and wish you happiness.\n\nMay this Diwali bring you peace when days feel heavy, courage when things feel difficult, and a thousand reasons to smile. Wherever life takes us, I want to keep collecting little moments with you.\n\nYou are my favourite reason to believe in magic.\n\nHappy Diwali, my Sona. Keep shining brighter than every star tonight.\n\nForever yours,\n{{from}} ♡`,
 
-  // Photo corner with fallback SVGs & support for user uploads
+  // Photo corner with fallback SVGs & support for live upload
   photos: [
     { file: "01-first-hello.jpg", svgFallback: "01-first-hello.svg", title: "The First Hello", caption: "One little hello on 05 May 2025 turned into our forever story.", date: "05 May 2025" },
     { file: "02-favourite-selfie.jpg", svgFallback: "02-favourite-selfie.svg", title: "My Favourite View", caption: "That precious smile of yours that effortlessly steals my breath away.", date: "Every Single Day" },
@@ -112,37 +112,14 @@ window.SONA_CONTENT = {
     }
   ],
 
-  quiz: [
-    {
-      question: "When did our little story first begin with a sweet hello?",
-      choices: ["5 May 2025", "28 June 2025", "15 August 2025", "14 February 2025"],
-      answer: 0,
-      note: "5 May 2025 — The very first page of our forever story! ♡"
-    },
-    {
-      question: "On which date did we make our relationship official?",
-      choices: ["5 May 2025", "28 June 2025", "31 December 2025", "11 November 2025"],
-      answer: 1,
-      note: "28 June 2025 — The best day of my life, my favourite yes! 💗"
-    },
-    {
-      question: "What is one thing Kaushal will never get tired of?",
-      choices: ["Eating cold pizza", "Watching your cute smile", "Sleeping through alarms", "Cleaning his desk"],
-      answer: 1,
-      note: "Your smile is my absolute favourite thing in this entire universe! ✨"
-    },
-    {
-      question: "What is Sona's secret superpower?",
-      choices: ["Making Kaushal blush instantly", "Being impossibly cute", "Lighting up every room she enters", "All of the above!"],
-      answer: 3,
-      note: "All of the above! You are 100% pure magic, Buchua. 😚"
-    },
-    {
-      question: "Who was this entire Diwali universe coded and designed for?",
-      choices: ["NASA scientists", "Alien neighbours", "My one and only Sona", "Google robots"],
-      answer: 2,
-      note: "Obviously for you, my Sona! Every single pixel is filled with love! 💖"
-    }
+  // Brand New Game 3: Love Slot Machine Prizes & Combinations
+  slotPrizes: [
+    { match: "🪔🪔🪔", title: "Golden Diya Jackpot! ✨", text: "Pure festival magic! Kaushal promises an unforgettable candlelit dinner and endless Diwali sweets!" },
+    { match: "💖💖💖", title: "Triple Love Jackpot! 💖", text: "Three hearts aligned! 100 forehead kisses and infinite cozy cuddles redeemed immediately!" },
+    { match: "💍💍💍", title: "Forever Bond Jackpot! 💍", text: "One date, two hearts, infinite forever. Kaushal promises to always stand by Sona's side!" },
+    { match: "🌸🌸🌸", title: "Sweet Romance Jackpot! 🌸", text: "Sweetest smile in the universe! A surprise gift and bouquet of hugs is on its way!" },
+    { match: "🧸🧸🧸", title: "Cuddle Bear Jackpot! 🧸", text: "Maximum cuteness achieved! You win unlimited lifetime bear hugs without expiry!" },
+    { match: "🎁🎁🎁", title: "Mystery Present Jackpot! 🎁", text: "Kaushal's entire heart belongs to you, wrapped in gold and tied with love!" }
   ],
 
   scratchMessages: [
@@ -168,14 +145,6 @@ window.SONA_CONTENT = {
     "A Handwritten Love Letter 💌",
     "One Free Silly Joke 🤪",
     "A Special Diwali Wish 🪔"
-  ],
-
-  hiddenHeartMessages: [
-    "You found the first little heart! (Just like how you stole my heart!) ♡",
-    "Second heart found! One more reason to smile today. 🌸",
-    "Third heart found! You are so good at this, Buchua! ✨",
-    "Fourth heart unlocked! Almost there, my love! 🏮",
-    "All five hearts collected! You found all the hidden treasures of my heart! 💗"
   ],
 
   wishes: [

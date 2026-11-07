@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 220" width="100%" height="100%">
+  <defs>
+    <radialGradient id="skyHalo" cx="50%" cy="40%" r="55%">
+      <stop offset="0%" stop-color="#ffd166" stop-opacity="0.35" />
+      <stop offset="50%" stop-color="#ff758f" stop-opacity="0.2" />
+      <stop offset="100%" stop-color="#120824" stop-opacity="0" />
+    </radialGradient>
+  </defs>
+
+  <!-- Twilight Backdrop Halo -->
+  <circle cx="160" cy="100" r="85" fill="url(#skyHalo)" />
+
+  <!-- Crescent Moon -->
+  <path d="M 195,45 A 28,28 0 0 1 170,82 A 28,28 0 1 0 195,45 Z" fill="#ffeaa7" opacity="0.9" />
+
+  <!-- Hanging Fairy Lights String -->
+  <path d="M 20,25 Q 90,65 160,35 Q 230,65 300,25" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="1.5" />
+  <circle cx="70" cy="48" r="4" fill="#ff758f" />
+  <circle cx="115" cy="50" r="4" fill="#ffd166" />
+  <circle cx="160" cy="35" r="4.5" fill="#ffb703" />
+  <circle cx="205" cy="50" r="4" fill="#ff758f" />
+  <circle cx="250" cy="48" r="4" fill="#4cc9f0" />
+
+  <!-- Hilltop Platform -->
+  <path d="M 0,220 Q 160,165 320,220 Z" fill="#180c2e" />
+  <path d="M 0,220 Q 160,172 320,220 Z" fill="#241344" />
+
+  <!-- Glowing Ground Diya -->
+  <ellipse cx="160" cy="180" rx="14" ry="4" fill="#ff9800" />
+  <path d="M 160,174 Q 163,165 160,162 Q 157,165 160,174 Z" fill="#fff" />
+  <circle cx="160" cy="168" r="8" fill="rgba(255, 193, 7, 0.5)" />
+
+  <!-- Boy Silhouette (Kaushal) -->
+  <g fill="#0e061d">
+    <!-- Boy Head -->
+    <circle cx="132" cy="122" r="13" />
+    <!-- Boy Hair Tufts -->
+    <path d="M 120,118 Q 128,107 142,112 Q 138,124 120,118 Z" />
+    <!-- Boy Torso & Arm resting on shoulder -->
+    <path d="M 115,142 C 115,135 145,135 145,142 L 148,185 L 112,185 Z" />
+    <path d="M 136,138 Q 156,136 170,146" stroke="#0e061d" stroke-width="6" stroke-linecap="round" fill="none" />
+  </g>
+
+  <!-- Girl Silhouette (Sona) leaning head on shoulder -->
+  <g fill="#160829">
+    <!-- Long Hair Backing -->
+    <path d="M 172,126 Q 192,150 188,180 Q 170,175 168,145 Z" fill="#0e061d" />
+    <!-- Girl Head tilted towards boy -->
+    <circle cx="165" cy="125" r="12" />
+    <!-- Cute Ponytail / Hair Wave -->
+    <path d="M 156,118 Q 170,112 176,122 Q 186,145 182,175" stroke="#0e061d" stroke-width="5" stroke-linecap="round" fill="none" />
+    <!-- Girl Torso -->
+    <path d="M 152,142 C 152,136 178,136 182,145 L 184,185 L 148,185 Z" />
+  </g>
+
+  <!-- Little Heart Floating Above Them -->
+  <path d="M 148,94 C 148,88 141,84 136,88 C 131,84 124,88 124,94 C 124,103 136,110 136,110 C 136,110 148,103 148,94 Z" fill="#ff758f" />
+</svg>
