@@ -1,0 +1,706 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+  <meta name="theme-color" content="#0e091b" />
+  <meta name="description" content="A magical, cute & romantic Diwali Universe crafted with love for Sona." />
+  <title>Sona's Diwali Universe 💗✨</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- Ambient background lighting & particle canvas -->
+  <div class="ambient ambient-one" aria-hidden="true"></div>
+  <div class="ambient ambient-two" aria-hidden="true"></div>
+  <div class="ambient ambient-three" aria-hidden="true"></div>
+  <canvas id="ambientCanvas" class="ambient-canvas" aria-hidden="true"></canvas>
+
+  <!-- Top Hanging Fairy Lights Garland -->
+  <div class="fairy-lights-garland" aria-hidden="true">
+    <span class="bulb bulb-pink"></span><span class="bulb bulb-gold"></span><span class="bulb bulb-amber"></span>
+    <span class="bulb bulb-rose"></span><span class="bulb bulb-cyan"></span><span class="bulb bulb-gold"></span>
+    <span class="bulb bulb-pink"></span><span class="bulb bulb-amber"></span><span class="bulb bulb-rose"></span>
+    <span class="bulb bulb-gold"></span><span class="bulb bulb-pink"></span><span class="bulb bulb-cyan"></span>
+  </div>
+
+  <!-- Welcome / Intro Gateway -->
+  <section class="welcome-screen" id="welcomeScreen" aria-label="Welcome">
+    <div class="welcome-stars" aria-hidden="true">✦　·　✧　　✦　　·　✧　　✦</div>
+    <div class="welcome-card">
+      <div class="mini-brand"><span class="brand-mark">🪔</span> A LITTLE WORLD MADE WITH ALL MY LOVE</div>
+      
+      <div class="welcome-diya-interactive" id="welcomeDiyaAction" role="button" tabindex="0" title="Touch to light the diya and enter">
+        <div class="diya-glow"></div>
+        <div class="flame-halo"></div>
+        <div class="diya-flame"></div>
+        <div class="diya-bowl-svg">
+          <svg viewBox="0 0 100 45" width="100" height="45">
+            <path d="M 5,12 C 15,38 85,38 95,12 C 75,20 25,20 5,12 Z" fill="url(#diyaGoldGrad)" />
+            <ellipse cx="50" cy="12" rx="45" ry="9" fill="#9e472a" />
+            <ellipse cx="50" cy="12" rx="38" ry="6" fill="#f49b42" opacity="0.8" />
+            <defs>
+              <linearGradient id="diyaGoldGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#ffd56b" />
+                <stop offset="50%" stop-color="#cf7d38" />
+                <stop offset="100%" stop-color="#733019" />
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <span class="tap-hint">Tap Diya to Ignite ✨</span>
+      </div>
+
+      <p class="eyebrow">A FESTIVE DIWALI SURPRISE FROM YOUR FAVOURITE PERSON</p>
+      <h1>Hey, <em id="welcomeName">My Sona</em> <span class="pink-heart">♥</span></h1>
+      <p class="welcome-copy">Some lights shine in the sky.<br />Some make a warm, permanent home in our hearts.</p>
+      <p class="welcome-small">Tonight, this entire little universe is all yours, Buchua.</p>
+      
+      <button class="btn btn-primary enter-btn" id="enterButton">
+        <span>Light Up Our Universe</span>
+        <span class="btn-arrow">✨</span>
+      </button>
+
+      <div class="welcome-foot">HANDCRAFTED WITH LOTS OF LOVE · KAUSHAL & SONA</div>
+    </div>
+    <div class="welcome-bottom-note">Tip: Turn your sound on for the romantic music & magic ♡</div>
+  </section>
+
+  <!-- Main Website Shell -->
+  <div class="site-shell" id="siteShell" aria-hidden="true">
+    
+    <!-- Sticky Glass Topbar -->
+    <header class="topbar">
+      <a class="brand" href="#home" aria-label="Sona's Universe Home">
+        <span class="brand-symbol">🪔</span>
+        <span class="brand-text">SONA'S <b>UNIVERSE</b> <i class="sparkle-tag">✨</i></span>
+      </a>
+
+      <nav class="desktop-nav" aria-label="Main Navigation">
+        <a href="#ceremony">Diyas</a>
+        <a href="#journey">Journey</a>
+        <a href="#memories">Our Story</a>
+        <a href="#sparkler-zone">Phuljhadi</a>
+        <a href="#games">Arcade</a>
+        <a href="#surprises">Surprises</a>
+        <a href="#letters">Letters</a>
+      </nav>
+
+      <div class="top-actions">
+        <!-- Love Meter Quick Badge -->
+        <a class="love-badge-nav" href="#meter" title="Collected Hearts">
+          <span class="love-heart-pulse">💖</span>
+          <b id="navHeartCount">0</b>
+        </a>
+        <button class="icon-btn" id="soundToggle" aria-label="Toggle Sound Effects" title="Sound Effects">
+          <span id="soundIcon">🔔</span>
+        </button>
+        <button class="icon-btn" id="musicToggle" aria-label="Toggle Romantic Music" title="Background Music">
+          <span id="musicIcon">🎵</span>
+        </button>
+        <button class="icon-btn mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle Navigation Menu">
+          <span>☰</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Mobile Drawer Nav -->
+    <div class="mobile-nav-drawer" id="mobileNavDrawer" aria-hidden="true">
+      <a href="#home" class="mobile-nav-link">🏠 Home</a>
+      <a href="#ceremony" class="mobile-nav-link">🪔 Diya Ceremony</a>
+      <a href="#journey" class="mobile-nav-link">⏳ Love Journey</a>
+      <a href="#memories" class="mobile-nav-link">📸 Our Photo Wall</a>
+      <a href="#sparkler-zone" class="mobile-nav-link">🎇 Phuljhadi & Sky Lantern</a>
+      <a href="#games" class="mobile-nav-link">🎮 Love Arcade</a>
+      <a href="#surprises" class="mobile-nav-link">🎁 Surprise Vault</a>
+      <a href="#letters" class="mobile-nav-link">💌 Open When Letters</a>
+      <a href="#finale" class="mobile-nav-link">✨ Secret Finale</a>
+    </div>
+
+    <main>
+      <!-- Hero Section -->
+      <section class="hero section-wrap" id="home">
+        <div class="hero-copy">
+          <div class="pill-label">
+            <span class="live-dot"></span>
+            <span>SHUBH DEEPAVALI 2025 · FOR MY BUCHUA</span>
+          </div>
+          <p class="hero-kicker">A little magic, a whole lot of love ♡</p>
+          <h2>Happy Diwali,<br /><em id="heroName">Sona</em><span class="hero-heart">💖</span></h2>
+          <p class="hero-description">
+            I couldn't wrap the entire night sky in a gift box, so I hand-coded a magical little universe right here. 
+            Explore cozy memories, light sacred diyas, play mini games, and uncover secret treasures made just for you.
+          </p>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="#ceremony">Light Sona's Diya <span>🪔</span></a>
+            <button class="btn btn-quiet" id="heroHug">Send Kaushal A Tight Hug <span>🫂</span></button>
+            <a class="btn btn-outline" href="#sparkler-zone">Play Phuljhadi <span>🎇</span></a>
+          </div>
+          <div class="hero-signature">
+            <span>Forever cheering for your sweetest smile,</span>
+            <b id="fromName">Kaushal</b> <span class="sign-heart">♡</span>
+          </div>
+        </div>
+
+        <!-- Hero Decorative Stage -->
+        <div class="hero-art" aria-label="Diwali Moonlit Scene">
+          <div class="moon"></div>
+          <div class="moon-halo"></div>
+          <div class="orbit orbit-one"><i>💖</i></div>
+          <div class="orbit orbit-two"><i>✦</i></div>
+          <span class="hero-star star-a">✦</span>
+          <span class="hero-star star-b">✧</span>
+          <span class="hero-star star-c">·</span>
+          <span class="hero-star star-d">✦</span>
+          <span class="hero-star star-e">✧</span>
+
+          <!-- Hanging Traditional Akash Kandil (Lanterns) -->
+          <div class="hanging-lantern lantern-left" title="Click to sway">
+            <div class="lantern-body">
+              <span class="lantern-tassel"></span>
+            </div>
+          </div>
+          <div class="hanging-lantern lantern-right" title="Click to sway">
+            <div class="lantern-body">
+              <span class="lantern-tassel"></span>
+            </div>
+          </div>
+
+          <!-- Hero Glowing Diyas -->
+          <div class="hero-diya diya-left" id="heroDiyaLeft">
+            <div class="flame"></div>
+            <div class="flame-glow"></div>
+            <div class="bowl"></div>
+          </div>
+          <div class="hero-diya diya-right" id="heroDiyaRight">
+            <div class="flame"></div>
+            <div class="flame-glow"></div>
+            <div class="bowl"></div>
+          </div>
+
+          <div class="hero-art-caption">
+            <span>✧</span> Two hearts, one festival, infinite love <span>✧</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Live Love Journey & Counter Section -->
+      <section class="love-counter-strip section-wrap" id="journey" aria-label="Our Love Journey Counter">
+        <div class="counter-header">
+          <span class="counter-icon">⏳</span>
+          <div>
+            <p class="eyebrow">OUR BEAUTIFUL TIMELINE</p>
+            <h3>Counting Every Second With You ♡</h3>
+            <p class="counter-sub">Since our first sweet hello on <b>05 May 2025</b> & official beginning on <b>28 June 2025</b>.</p>
+          </div>
+        </div>
+        <div class="timer-grid">
+          <div class="timer-box">
+            <span class="timer-val" id="timerDays">0</span>
+            <span class="timer-lbl">Days</span>
+          </div>
+          <div class="timer-box">
+            <span class="timer-val" id="timerHours">0</span>
+            <span class="timer-lbl">Hours</span>
+          </div>
+          <div class="timer-box">
+            <span class="timer-val" id="timerMinutes">0</span>
+            <span class="timer-lbl">Minutes</span>
+          </div>
+          <div class="timer-box">
+            <span class="timer-val" id="timerSeconds">0</span>
+            <span class="timer-lbl">Seconds</span>
+          </div>
+        </div>
+        <div class="counter-footer">
+          <span class="pulse-dot"></span>
+          <span>...and falling in love with you with every single heartbeat. 💗</span>
+        </div>
+      </section>
+
+      <!-- Interactive 5-Diya Lighting Ceremony -->
+      <section class="content-section ceremony-section section-wrap" id="ceremony">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">शुभ दीपावली · SACRED CEREMONY</p>
+            <h3>The 5 Diyas of <em>Love & Light</em> 🪔</h3>
+            <p class="section-subtitle">Tap each traditional diya to illuminate its golden flame and unlock its heartfelt blessing for Sona.</p>
+          </div>
+          <span class="section-index">01 / CEREMONY</span>
+        </div>
+
+        <div class="diya-altar">
+          <div class="altar-rangoli-bg" aria-hidden="true"></div>
+          <div class="diya-row" id="diyaCeremonyRow">
+            <!-- Dynamically populated from content.js -->
+          </div>
+          <div class="ceremony-status" id="ceremonyStatus">
+            <span>✨ Tap an unlit diya above to ignite our universe ✨</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Interactive Phuljhadi (Digital Sparkler) & Akash Kandil (Sky Lantern) Release -->
+      <section class="content-section sparkler-section section-wrap" id="sparkler-zone">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">FESTIVE PLAYGROUND · फुलझड़ी और आकाश दीप</p>
+            <h3>Sparklers & <em>Sky Lanterns</em> 🎇</h3>
+            <p class="section-subtitle">Move your finger or mouse over the canvas to sparkle a digital phuljhadi, or release a glowing wish lantern into the sky!</p>
+          </div>
+          <span class="section-index">02 / SPARKLE</span>
+        </div>
+
+        <div class="sparkler-interactive-grid">
+          <!-- Sparkler Canvas Box -->
+          <div class="sparkler-card">
+            <div class="card-head-compact">
+              <div>
+                <h4>Phuljhadi Sparkler 🎇</h4>
+                <small>Drag your mouse or finger across the canvas to light sparks!</small>
+              </div>
+              <button class="btn btn-xs btn-outline" id="clearSparkler">Clear</button>
+            </div>
+            <div class="canvas-holder">
+              <canvas id="sparklerCanvas"></canvas>
+              <div class="canvas-hint" id="sparklerHint">✨ Move cursor or swipe to spark ✨</div>
+            </div>
+          </div>
+
+          <!-- Sky Lantern Release Box -->
+          <div class="lantern-release-card">
+            <div class="card-head-compact">
+              <div>
+                <h4>Akash Kandil / Sky Lantern 🏮</h4>
+                <small>Release a warm paper lantern with a wish into the stars.</small>
+              </div>
+            </div>
+            <div class="lantern-sky-preview" id="lanternSky">
+              <div class="sky-moon-tiny"></div>
+              <div class="lantern-fleet" id="lanternFleet"></div>
+            </div>
+            <div class="lantern-controls">
+              <select id="lanternWishSelect" class="form-select">
+                <option value="May Sona's smile always outshine every star in the sky! ♡">May Sona's smile always outshine every star! ♡</option>
+                <option value="May our love grow sweeter and deeper every single day. 💗">May our love grow sweeter and deeper every day. 💗</option>
+                <option value="May every brave dream in Buchua's heart come true! ✨">May every brave dream in Buchua's heart come true! ✨</option>
+                <option value="A lifetime of cozy Diwali nights with you, Sona. 🪔">A lifetime of cozy Diwali nights with you, Sona. 🪔</option>
+                <option value="custom">✏️ Type my own wish...</option>
+              </select>
+              <input type="text" id="customWishInput" class="form-input" placeholder="Type your special wish here..." style="display:none;" />
+              <button class="btn btn-primary btn-full" id="releaseLanternBtn">
+                <span>Release Sky Lantern 🏮</span>
+                <span>↗</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Scrapbook Polaroid Photo Corner with Upload & Instant Preview -->
+      <section class="content-section memories-section section-wrap" id="memories">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">OUR SCRAPBOOK · तस्वीरें और यादें</p>
+            <h3>Little Moments, <em>Forever Us</em> 📸</h3>
+            <p class="section-subtitle">Every photograph holds a little piece of our heart. You can also preview your own photos instantly!</p>
+          </div>
+          <span class="section-index">03 / MEMORIES</span>
+        </div>
+
+        <div class="scrapbook-actions-bar">
+          <div class="scrapbook-tip">
+            <span class="polaroid-pin">📌</span>
+            <span>Aesthetic couple polaroid wall. Click any photo to enlarge in full-screen!</span>
+          </div>
+          <div class="scrapbook-btn-group">
+            <label class="btn btn-quiet upload-photo-btn" title="Pick photos from your phone or PC to preview live!">
+              <span>📷 Upload / Preview Photos</span>
+              <input type="file" id="photoFileInput" accept="image/*" multiple style="display:none;" />
+            </label>
+            <button class="btn btn-xs btn-quiet" id="resetPhotosBtn" title="Reset to default aesthetic illustrations">Reset Default</button>
+          </div>
+        </div>
+
+        <!-- Polaroid Grid -->
+        <div class="polaroid-wall" id="photoGrid">
+          <!-- Rendered dynamically -->
+        </div>
+
+        <!-- Memory Timeline -->
+        <div class="timeline-wrap">
+          <div class="timeline-heading">
+            <span class="eyebrow">KEY MILESTONES</span>
+            <h4>Two Dates Written In Gold ✧</h4>
+          </div>
+          <div class="timeline">
+            <div class="timeline-line"></div>
+            <article class="timeline-item">
+              <span class="timeline-dot">♡</span>
+              <div class="timeline-date">05 MAY 2025</div>
+              <h4>The First Hello</h4>
+              <p>One quiet hello sparked a conversation that quickly became the sweetest rhythm of my day.</p>
+              <span class="timeline-note">Where our story found its first page ✧</span>
+            </article>
+            <article class="timeline-item">
+              <span class="timeline-dot">💍</span>
+              <div class="timeline-date">28 JUNE 2025</div>
+              <h4>Our Forever Began</h4>
+              <p>The day we made our relationship official. One date, two hearts, and a million butterflies.</p>
+              <span class="timeline-note">My favourite yes in this whole universe 💗</span>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- Love Progress Meter -->
+      <section class="progress-strip section-wrap" id="meter" aria-label="Love Meter Progress">
+        <div class="progress-intro">
+          <span class="progress-icon">💖</span>
+          <div>
+            <b>Sona's Love Meter</b>
+            <small>Collect hearts as you explore, play games & unlock surprises</small>
+          </div>
+        </div>
+        <div class="progress-track-wrap">
+          <div class="progress-track">
+            <div class="progress-fill" id="progressFill"></div>
+          </div>
+          <div class="progress-label">
+            <span id="heartCount">0 hearts collected</span>
+            <span id="progressPercent">0%</span>
+          </div>
+        </div>
+        <div class="progress-unlock">
+          <span class="unlock-star">✧</span>
+          <div>
+            <b>Secret Finale Letter</b>
+            <small id="unlockStatus">20 hearts to unlock</small>
+          </div>
+          <span class="lock-symbol" id="lockSymbol">🔒</span>
+        </div>
+      </section>
+
+      <!-- Festive Wish Banner -->
+      <section class="wish-banner section-wrap">
+        <div class="wish-icon">🪔</div>
+        <div class="wish-text">
+          <span class="eyebrow">A FESTIVE DIWALI WISH FOR YOU</span>
+          <p>May your days shine brighter than every diya in the galaxy, and may your laughter never run out of reasons. <b>Happy Diwali, my sweet Buchua.</b></p>
+        </div>
+        <div class="wish-time">11:11 <span>♡</span></div>
+      </section>
+
+      <!-- The Love Arcade (Mini Games) -->
+      <section class="content-section section-wrap" id="games">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">PLAY A LITTLE, SMILE A LOT</p>
+            <h3>The Love <em>Arcade</em> 🎮</h3>
+            <p class="section-subtitle">Six playful adventures to make you smile and collect hearts for our grand finale.</p>
+          </div>
+          <span class="section-index">04 / PLAY</span>
+        </div>
+
+        <div class="game-grid">
+          <!-- Game 1 -->
+          <article class="game-card" data-game="catch">
+            <div class="game-art art-hearts">
+              <span>💖</span><span>♥</span><span>♡</span><i>✦</i>
+            </div>
+            <div class="game-card-content">
+              <div class="game-tag">QUICK REFLEXES · 20 SEC</div>
+              <h4>Catch My Love</h4>
+              <p>Catch all the falling hearts & sweets before they fade. No pressure, just my heart falling for you!</p>
+              <button class="text-btn" data-open-game="catch">Play now <span>→</span></button>
+            </div>
+          </article>
+
+          <!-- Game 2 -->
+          <article class="game-card" data-game="diya">
+            <div class="game-art art-diya">
+              <span>🪔</span><i>✧</i><i>✦</i>
+            </div>
+            <div class="game-card-content">
+              <div class="game-tag">DIWALI CHALLENGE · 20 SEC</div>
+              <h4>Diya Dash</h4>
+              <p>Collect glowing golden diyas while dodging mischievous storm clouds.</p>
+              <button class="text-btn" data-open-game="diya">Play now <span>→</span></button>
+            </div>
+          </article>
+
+          <!-- Game 3 -->
+          <article class="game-card" data-game="quiz">
+            <div class="game-art art-quiz">
+              <span>💌</span><i>♡</i><i>✦</i>
+            </div>
+            <div class="game-card-content">
+              <div class="game-tag">HOW WELL DO YOU KNOW US?</div>
+              <h4>Love Story Quiz</h4>
+              <p>A few sweet questions about our milestones and silly memories. Let's see your score!</p>
+              <button class="text-btn" data-open-game="quiz">Take quiz <span>→</span></button>
+            </div>
+          </article>
+
+          <!-- Game 4 -->
+          <article class="game-card" data-game="hidden">
+            <div class="game-art art-hidden">
+              <span>🔍</span><i>✧</i><i>·</i>
+            </div>
+            <div class="game-card-content">
+              <div class="game-tag">EXPLORATION · 5 KEEPSAKES</div>
+              <h4>Find Hidden Charms</h4>
+              <p>Five lucky keepsakes are hiding inside our universe. Can you uncover them all?</p>
+              <button class="text-btn" data-open-game="hidden">Start search <span>→</span></button>
+            </div>
+          </article>
+
+          <!-- Game 5 -->
+          <article class="game-card" data-game="memory">
+            <div class="game-art art-memory">
+              <span>🧸</span><i>♡</i><i>✦</i>
+            </div>
+            <div class="game-card-content">
+              <div class="game-tag">MEMORY MATCH · 6 PAIRS</div>
+              <h4>Memory Matching</h4>
+              <p>Flip, remember, and match cute pairs. A little game for a girl with the loveliest mind.</p>
+              <button class="text-btn" data-open-game="memory">Play memory <span>→</span></button>
+            </div>
+          </article>
+
+          <!-- Game 6 (NEW) -->
+          <article class="game-card" data-game="fortune">
+            <div class="game-art art-fortune">
+              <span>🥠</span><i>✦</i><i>✧</i>
+            </div>
+            <div class="game-card-content">
+              <div class="game-tag">SWEET SURPRISE · INFINITE LOVE</div>
+              <h4>Magic Love Fortune</h4>
+              <p>Crack open a golden Diwali love cookie for a cute compliment tailored just for you!</p>
+              <button class="text-btn" data-open-game="fortune">Crack cookie <span>→</span></button>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- The Surprise Vault -->
+      <section class="content-section surprise-section section-wrap" id="surprises">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">DON'T OPEN THEM ALL AT ONCE… OR DO 👀</p>
+            <h3>The Surprise <em>Vault</em> 🎁</h3>
+            <p class="section-subtitle">Little secret gifts, sweet coupons, voice notes, and treasures I wish I could hand you in person.</p>
+          </div>
+          <span class="section-index">05 / MAGIC</span>
+        </div>
+
+        <div class="surprise-grid">
+          <!-- Scratch Card -->
+          <button class="surprise-card scratch-card" data-surprise="scratch">
+            <span class="surprise-visual">✧<b>?</b></span>
+            <span class="surprise-info">
+              <b>Scratch & Reveal Gold Card</b>
+              <small>Use your finger or mouse to scratch the gold foil</small>
+            </span>
+            <span class="surprise-arrow">↗</span>
+          </button>
+
+          <!-- Gift Box -->
+          <button class="surprise-card gift-card" data-surprise="gift">
+            <span class="surprise-visual">🎁</span>
+            <span class="surprise-info">
+              <b>3D Mystery Gift Box</b>
+              <small>Unwrap the ribbon to reveal a sweet surprise</small>
+            </span>
+            <span class="surprise-arrow">↗</span>
+          </button>
+
+          <!-- Spin Wheel -->
+          <button class="surprise-card wheel-card" data-surprise="wheel">
+            <span class="surprise-visual">🎡</span>
+            <span class="surprise-info">
+              <b>Spin The Love Wheel</b>
+              <small>Let fate decide your romantic reward</small>
+            </span>
+            <span class="surprise-arrow">↗</span>
+          </button>
+
+          <!-- Love Coupons (NEW) -->
+          <button class="surprise-card coupon-card" data-surprise="coupons">
+            <span class="surprise-visual">🎟️</span>
+            <span class="surprise-info">
+              <b>Redeemable Love Coupons</b>
+              <small>Valid vouchers for hugs, dates & winning fights</small>
+            </span>
+            <span class="surprise-arrow">↗</span>
+          </button>
+
+          <!-- Secret Room -->
+          <button class="surprise-card password-card" data-surprise="password">
+            <span class="surprise-visual">🔐</span>
+            <span class="surprise-info">
+              <b>The Secret Room</b>
+              <small>Protected by a secret nickname only you know</small>
+            </span>
+            <span class="surprise-arrow">↗</span>
+          </button>
+
+          <!-- Digital Hug -->
+          <button class="surprise-card hug-card" data-surprise="hug">
+            <span class="surprise-visual">🫂</span>
+            <span class="surprise-info">
+              <b>Warm Digital Hug Machine</b>
+              <small>Full-screen warmth whenever you miss me</small>
+            </span>
+            <span class="surprise-arrow">↗</span>
+          </button>
+
+          <!-- Voice Note / Melody Player -->
+          <button class="surprise-card audio-card" data-surprise="audio">
+            <span class="surprise-visual">🎙️</span>
+            <span class="surprise-info">
+              <b>Voice Note & Sweet Melody</b>
+              <small>Press play to hear warm words & romantic music</small>
+            </span>
+            <span class="surprise-arrow">↗</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Open When... Letters -->
+      <section class="content-section letters-section section-wrap" id="letters">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">FOR EVERY VERSION OF YOU</p>
+            <h3>Open When… <em>Letters</em> 💌</h3>
+            <p class="section-subtitle">Five wax-sealed letters. Read one whenever your heart asks for a little reassurance or a warm smile.</p>
+          </div>
+          <span class="section-index">06 / WORDS</span>
+        </div>
+
+        <div class="letter-grid" id="letterGrid">
+          <!-- Rendered dynamically -->
+        </div>
+      </section>
+
+      <!-- 11:11 Wish Galaxy -->
+      <section class="wish-galaxy section-wrap" id="galaxy">
+        <div class="galaxy-copy">
+          <p class="eyebrow">MAKE AN 11:11 WISH, MY LOVE</p>
+          <h3>The 11:11 <em>Wish Galaxy</em> 🌌</h3>
+          <p>Tap any twinkling star in the celestial dome. Somewhere between the night sky and this screen, a sweet wish will illuminate for you.</p>
+          <button class="btn btn-primary" id="makeWish">
+            <span>Make My 11:11 Wish</span>
+            <span>✧</span>
+          </button>
+          <div class="galaxy-result" id="wishResult" aria-live="polite"></div>
+        </div>
+        <div class="galaxy-sky" id="galaxySky" aria-label="Interactive starry sky">
+          <div class="galaxy-orbit"></div>
+          <div class="galaxy-orbit orbit-inner"></div>
+          <span class="galaxy-center">💖</span>
+        </div>
+      </section>
+
+      <!-- Secret Finale Section -->
+      <section class="finale-section section-wrap" id="finale">
+        <div class="finale-stars" aria-hidden="true">✦　　✧　　·　　✦　　　✧　　✦</div>
+        <div class="finale-content">
+          <span class="finale-lock" id="finaleLock">🔒</span>
+          <p class="eyebrow">THE ULTIMATE DIWALI SURPRISE</p>
+          <h3>One Last Thing,<br /><em>My Sona.</em></h3>
+          <p class="finale-description" id="finaleDescription">
+            Collect 20 hearts from your little adventures to unlock the final letter and ignite our grand fireworks sky.
+          </p>
+          <button class="btn btn-primary" id="finaleButton" disabled>
+            <span>Unlock Our Grand Finale</span>
+            <span>💖</span>
+          </button>
+          <div class="finale-progress-text" id="finaleProgressText">0 / 20 hearts collected</div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="footer-brand">
+        <span class="footer-diya">🪔</span>
+        <span>SONA'S DIWALI UNIVERSE</span>
+      </div>
+      <p>Some lights are seen in the sky. Some are felt in the soul. You are both, Buchua. ♡</p>
+      <div class="footer-dates">First Hello: 05 May 2025 • Official Beginning: 28 June 2025</div>
+      <small>HANDCRAFTED WITH ENDLESS LOVE & ADMIRATION · <span id="footerFrom">KAUSHAL</span></small>
+    </footer>
+  </div>
+
+  <!-- Persistent Floating Mini Music Player -->
+  <aside class="floating-music-dock" id="musicDock" aria-label="Music Player Dock">
+    <div class="dock-disc" id="dockDisc">
+      <div class="disc-grooves"></div>
+      <span class="disc-label">🪔</span>
+    </div>
+    <div class="dock-info">
+      <b class="dock-title" id="dockTrackTitle">Romantic Lofi Dreams ✨</b>
+      <span class="dock-artist">Sona's Personal Soundtrack</span>
+    </div>
+    <div class="dock-controls">
+      <button class="dock-btn" id="dockPlayBtn" aria-label="Play or Pause" title="Play / Pause">▶</button>
+      <button class="dock-btn" id="dockNextBtn" aria-label="Next Song" title="Next Song">⏭</button>
+    </div>
+  </aside>
+
+  <!-- Notification Toast -->
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <!-- Fullscreen Digital Hug Overlay -->
+  <div class="hug-overlay" id="hugOverlay" aria-hidden="true">
+    <div class="hug-burst" id="hugBurst"></div>
+    <div class="hug-message">
+      <span class="hug-icon">🫂</span>
+      <h3>Consider yourself hugged,<br /><em id="hugNickname">Buchua</em>.</h3>
+      <p>One very tight, extra warm, never-let-go hug directly from Kaushal's heart.</p>
+      <button class="btn btn-primary" id="closeHug">Hug Received With Love 💗</button>
+    </div>
+  </div>
+
+  <!-- Photo Lightbox Modal -->
+  <div class="lightbox" id="lightbox" aria-hidden="true">
+    <div class="lightbox-shell">
+      <button class="lightbox-close" id="lightboxClose" aria-label="Close Lightbox">✕</button>
+      <div class="lightbox-img-wrap">
+        <img src="" alt="" id="lightboxImg" />
+      </div>
+      <div class="lightbox-caption">
+        <h4 id="lightboxTitle">Photo</h4>
+        <p id="lightboxDesc">Description</p>
+        <span class="lightbox-date" id="lightboxDate"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Generic Reusable Modal Dialog -->
+  <dialog class="modal" id="modal">
+    <div class="modal-shell">
+      <button class="modal-close" id="modalClose" aria-label="Close Modal">✕</button>
+      <div class="modal-content" id="modalContent"></div>
+    </div>
+  </dialog>
+
+  <!-- Audio Elements -->
+  <audio id="bgMusic" loop preload="none"></audio>
+  <audio id="voiceMessage" preload="none"></audio>
+
+  <!-- Scripts -->
+  <script src="js/content.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+      window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js').catch(() => {}));
+    }
+  </script>
+</body>
+</html>

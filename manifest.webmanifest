@@ -1,0 +1,10 @@
+{
+  "name": "Sona's Diwali Universe",
+  "short_name": "Sona's Universe",
+  "description": "A little Diwali universe made with love, just for Sona.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#100b20",
+  "theme_color": "#100b20",
+  "icons": [{ "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
+}
